@@ -36,7 +36,7 @@ export function generateBoardData() {
     return boardData2;
 }
 
-// 64 клітинки дошки (чорні та білі квадрати)
+// render 64 клітинки дошки (чорні та білі квадрати)
 export function renderSquares(board) {
     for (let i = 0; i < ROW; i++) {
         for (let j = 0; j < COL; j++) {

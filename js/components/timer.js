@@ -37,6 +37,5 @@ export function startTimer(section_board) {
 }
 
 export function stopTimer() {
-    console.log(timerInterval)
     clearInterval(timerInterval);
 }
