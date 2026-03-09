@@ -1,0 +1,296 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&display=swap');
+
+
+:root {
+    --square-size: clamp(40px, 10vw, 80px);
+    --checker-size: calc(var(--square-size) * 0.75);
+    --board-border-size: clamp(6px, 1.5vw, 12px);
+
+
+    --fs-menu-title: clamp(2.5rem, 6vw, 5rem);
+    --fs-section-title: clamp(1.8rem, 4vw, 2.5rem);
+    --fs-btn: clamp(0.9rem, 2vw, 1.1rem);
+    --fs-timer: clamp(20px, 4vw, 32px);
+    --fs-turn: clamp(14px, 3vw, 20px);
+
+    --gap-menu: clamp(1.5rem, 4vw, 2.5rem);
+    --gap-section: clamp(15px, 3vw, 30px);
+    --gap-menu-container: clamp(10px, 2vw, 20px);
+    --gap-info: clamp(10px, 3vw, 20px);
+
+
+    --pad-btn-y: clamp(0.5rem, 2vw, 1rem);
+    --pad-btn-x: clamp(1.5rem, 4vw, 3.5rem);
+    
+    --pad-info-y: clamp(6px, 1.5vw, 10px);
+    --pad-timer-x: clamp(12px, 3vw, 20px);
+    --pad-turn-x: clamp(10px, 2.5vw, 18px);
+    
+    --width-timer: clamp(90px, 15vw, 120px);
+
+
+    --color-board-border: #2c1e16;
+    --color-white-square: #f0d9b5;
+    --color-black-square: #b58863;
+
+    --color-checker-light: #f0e2ca;
+    --color-checker-light-border: #dabd98;
+    --color-checker-dark: #2c2c2c;
+    --color-checker-dark-border: #1a1a1a;
+
+    --color-text-main: #ffffff;
+    --color-accent: #f0d9a0;
+    --color-accent-hover: #fff8e7;
+    --color-timer-glow: #00ff9d;
+
+    --color-bg-menu:#1a1a1a;
+
+    --font-main: 'Montserrat', sans-serif;
+    --font-serif: 'Georgia', serif;
+}
+
+/* ГОЛОВНЕ МЕНЮ */
+.menu {
+    min-height: 100vh; 
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gap-menu);
+    background: var(--color-bg-menu);
+    font-family: var(--font-serif);
+    position: relative;
+}
+
+.menu::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-conic-gradient(#2a2a2a 0% 25%, #1a1a1a 0% 50%);
+    background-size: 60px 60px;
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.menu__title {
+    position: relative;
+    z-index: 1;
+    font-size: var(--fs-menu-title);
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    text-shadow: 0 0 40px rgba(240, 217, 160, 0.3);
+    text-align: center;
+}
+
+.menu__btn {
+    position: relative;
+    z-index: 1;
+    padding: var(--pad-btn-y) var(--pad-btn-x);
+    font-family: var(--font-serif);
+    font-size: var(--fs-btn);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #1a1a1a;
+    background: var(--color-accent);
+    border: none;
+    cursor: pointer;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+    box-shadow: 4px 4px 0px #8b6914;
+}
+
+.menu__btn:hover {
+    background: var(--color-accent-hover);
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px #8b6914;
+}
+
+.menu__btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px #8b6914;
+}
+
+/* ІГРОВА СЕКЦІЯ ТА UI  */
+.game-section {
+    width: 100%;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gap-section);
+    padding: 20px;
+
+    background-image: url('https://images.unsplash.com/photo-1551269901-5c5e14c25df7?q=80&w=1920&auto=format&fit=crop');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    box-shadow: inset 0 0 0 2000px rgba(0, 0, 0, 0.65);
+    font-family: var(--font-main);
+}
+
+.game-section__title {
+    color: var(--color-text-main);
+    font-size: var(--fs-section-title);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 2px 4px 10px rgba(0, 0, 0, 0.8);
+    text-align: center;
+}
+
+.game-menu__container {
+    display: flex;
+    gap: var(--gap-menu-container);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.game-info {
+    display: flex;
+    gap: var(--gap-info);
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.game-info__timer {
+    font-size: var(--fs-timer);
+    font-weight: bold;
+    font-family: monospace;
+    background: #222;
+    color: var(--color-timer-glow);
+    padding: var(--pad-info-y) var(--pad-timer-x);
+    border-radius: 10px;
+    min-width: var(--width-timer);
+    text-align: center;
+    box-shadow: 0 0 10px var(--color-timer-glow);
+}
+
+.game-info__turn {
+    font-size: var(--fs-turn);
+    font-weight: 600;
+    padding: var(--pad-info-y) var(--pad-turn-x);
+    border-radius: 12px;
+    background: linear-gradient(135deg, #2b2b2b, #1a1a1a);
+    color: var(--color-text-main);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    border: 2px solid #444;
+}
+
+/* ІГРОВА ДОШКА  */
+.board {
+    display: grid;
+    grid-template-columns: repeat(8, var(--square-size));
+    grid-template-rows: repeat(8, var(--square-size));
+    border: var(--board-border-size) solid var(--color-board-border);
+    border-radius: 4px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8), inset 0 0 10px rgba(0,0,0,0.5);
+    background-color: var(--color-board-border);
+}
+
+.board__cell {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.board__cell--white { 
+    background-color: var(--color-white-square); 
+}
+.board__cell--black {
+    background-color: var(--color-black-square); 
+}
+
+/* ШАШКИ  */
+.checker {
+    width: var(--checker-size);
+    height: var(--checker-size);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.checker::before,
+.checker::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+}
+
+.checker::before {
+    width: 70%;
+    height: 70%;
+}
+
+.checker::after {
+    width: 35%;
+    height: 35%;
+}
+
+/* --- Світла шашка --- */
+.checker--light {
+    background-color: var(--color-checker-light);
+    box-shadow: 
+        0 4px 5px rgba(0,0,0,0.3), 
+        inset 0 -3px 4px rgba(0,0,0,0.2), 
+        inset 0 3px 4px rgba(255,255,255,0.8);
+}
+
+.checker--light::before {
+    border: 1.5px solid var(--color-checker-light-border);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1), 0 2px 2px rgba(255,255,255,0.9);
+}
+
+.checker--light::after {
+    background-color: var(--color-checker-light);
+    border: 1px solid var(--color-checker-light-border);
+    box-shadow: inset 0 2px 2px rgba(255,255,255,0.8), 0 2px 3px rgba(0,0,0,0.1);
+}
+
+/* --- Темна шашка --- */
+.checker--dark {
+    background-color: var(--color-checker-dark);
+    box-shadow: 
+        0 4px 5px rgba(0,0,0,0.4), 
+        inset 0 -3px 4px rgba(0,0,0,0.6), 
+        inset 0 3px 4px rgba(255,255,255,0.2);
+}
+
+.checker--dark::before {
+    border: 1.5px solid var(--color-checker-dark-border);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 1px 1px rgba(255,255,255,0.1);
+}
+
+.checker--dark::after {
+    background-color: var(--color-checker-dark);
+    border: 1px solid var(--color-checker-dark-border);
+    box-shadow: inset 0 1px 2px rgba(255,255,255,0.1), 0 2px 3px rgba(0,0,0,0.4);
+}
+
+.checker:hover {
+    transform: translateY(-2px);
+}
+
+.checker.is-selected {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 
+        0 0 0 3px #ff4757, 
+        0 12px 20px rgba(0,0,0,0.5), 
+        inset 0 -3px 4px rgba(0,0,0,0.3), 
+        inset 0 2px 3px rgba(255,255,255,0.7);
+    z-index: 10;
+}
