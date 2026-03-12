@@ -1,55 +1,106 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&display=swap');
 
-
 :root {
     --square-size: clamp(40px, 10vw, 80px);
     --checker-size: calc(var(--square-size) * 0.75);
     --board-border-size: clamp(6px, 1.5vw, 12px);
 
 
+    --font-main: 'Montserrat', sans-serif;
+    --font-serif: 'Georgia', serif;
+
     --fs-menu-title: clamp(2.5rem, 6vw, 5rem);
     --fs-section-title: clamp(1.8rem, 4vw, 2.5rem);
     --fs-btn: clamp(0.9rem, 2vw, 1.1rem);
     --fs-timer: clamp(20px, 4vw, 32px);
     --fs-turn: clamp(14px, 3vw, 20px);
+    --fs-king-crown: 0.8rem;
+    --fs-win-title: 2.5rem;
+    --fs-win-btn: 1.2rem;
 
+    /* Відступи  */
     --gap-menu: clamp(1.5rem, 4vw, 2.5rem);
     --gap-section: clamp(15px, 3vw, 30px);
     --gap-menu-container: clamp(10px, 2vw, 20px);
     --gap-info: clamp(10px, 3vw, 20px);
 
-
     --pad-btn-y: clamp(0.5rem, 2vw, 1rem);
     --pad-btn-x: clamp(1.5rem, 4vw, 3.5rem);
-    
     --pad-info-y: clamp(6px, 1.5vw, 10px);
     --pad-timer-x: clamp(12px, 3vw, 20px);
     --pad-turn-x: clamp(10px, 2.5vw, 18px);
-    
+    --pad-win-message: 2rem 4rem;
+    --pad-win-btn: 10px 25px;
+
     --width-timer: clamp(90px, 15vw, 120px);
 
+    /* Кольори фону та інтерфейсу */
+    --color-bg-menu: #1a1a1a;
+    --color-bg-menu-pattern: #2a2a2a;
+    --color-bg-game-overlay: rgba(0, 0, 0, 0.65);
+    --color-bg-timer: #222;
+    --color-bg-turn-start: #2b2b2b;
+    --color-bg-turn-end: #1a1a1a;
+    --color-bg-win-message: rgba(255, 255, 255, 0.95);
+    --color-btn-restart: #4CAF50;
+    --color-btn-restart-hover: #45a049;
 
-    --color-board-border: #2c1e16;
-    --color-white-square: #f0d9b5;
-    --color-black-square: #b58863;
-
-    --color-checker-light: #f0e2ca;
-    --color-checker-light-border: #dabd98;
-    --color-checker-dark: #2c2c2c;
-    --color-checker-dark-border: #1a1a1a;
-
+    /* Кольори тексту */
     --color-text-main: #ffffff;
+    --color-text-dark: #333;
+    --color-text-btn: #1a1a1a;
     --color-accent: #f0d9a0;
     --color-accent-hover: #fff8e7;
     --color-timer-glow: #00ff9d;
 
-    --color-bg-menu:#1a1a1a;
+    /* Кольори дошки */
+    --color-board-border: #2c1e16;
+    --color-white-square: #f0d9b5;
+    --color-black-square: #b58863;
+    --color-highlight-base: rgba(0, 255, 157, 0.6);
+    --color-highlight-hover: rgba(0, 255, 157, 1);
 
-    --font-main: 'Montserrat', sans-serif;
-    --font-serif: 'Georgia', serif;
+    /* Кольори шашок */
+    --color-checker-light: #f0e2ca;
+    --color-checker-light-border: #dabd98;
+    --color-checker-dark: #2c2c2c;
+    --color-checker-dark-border: #1a1a1a;
+    --color-checker-king-border: gold;
+    --color-checker-selected-ring: #ff4757;
+
+    /* Тіні  */
+    --shadow-menu-title: 0 0 40px rgba(240, 217, 160, 0.3);
+    --shadow-menu-btn: 4px 4px 0px #8b6914;
+    --shadow-menu-btn-hover: 6px 6px 0px #8b6914;
+    --shadow-menu-btn-active: 2px 2px 0px #8b6914;
+    
+    --shadow-section-title: 2px 4px 10px rgba(0, 0, 0, 0.8);
+    --shadow-timer: 0 0 10px var(--color-timer-glow);
+    --shadow-turn: 0 4px 10px rgba(0,0,0,0.4);
+    
+    --shadow-board: 0 25px 50px rgba(0, 0, 0, 0.8), inset 0 0 10px rgba(0,0,0,0.5);
+    --shadow-highlight: 0 0 10px rgba(0, 255, 157, 0.8);
+    --shadow-win-message: 0 4px 15px rgba(0, 0, 0, 0.3);
+
+    --shadow-checker-light: 0 4px 5px rgba(0,0,0,0.3), inset 0 -3px 4px rgba(0,0,0,0.2), inset 0 3px 4px rgba(255,255,255,0.8);
+    --shadow-checker-light-before: inset 0 2px 4px rgba(0,0,0,0.1), 0 2px 2px rgba(255,255,255,0.9);
+    --shadow-checker-light-after: inset 0 2px 2px rgba(255,255,255,0.8), 0 2px 3px rgba(0,0,0,0.1);
+    
+    --shadow-checker-dark: 0 4px 5px rgba(0,0,0,0.4), inset 0 -3px 4px rgba(0,0,0,0.6), inset 0 3px 4px rgba(255,255,255,0.2);
+    --shadow-checker-dark-before: inset 0 2px 4px rgba(0,0,0,0.5), 0 1px 1px rgba(255,255,255,0.1);
+    --shadow-checker-dark-after: inset 0 1px 2px rgba(255,255,255,0.1), 0 2px 3px rgba(0,0,0,0.4);
+
+    --shadow-checker-selected: 0 0 0 3px var(--color-checker-selected-ring), 0 12px 20px rgba(0,0,0,0.5), inset 0 -3px 4px rgba(0,0,0,0.3), inset 0 2px 3px rgba(255,255,255,0.7);
+
+    /* Інше */
+    --transition-fast: 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    --radius-info: 10px;
+    --radius-turn: 12px;
+    --radius-win: 10px;
+    --radius-btn: 5px;
+    --border-turn: 2px solid #444;
 }
 
-/* ГОЛОВНЕ МЕНЮ */
 .menu {
     min-height: 100vh; 
     width: 100%;
@@ -67,7 +118,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background-image: repeating-conic-gradient(#2a2a2a 0% 25%, #1a1a1a 0% 50%);
+    background-image: repeating-conic-gradient(var(--color-bg-menu-pattern) 0% 25%, var(--color-bg-menu) 0% 50%);
     background-size: 60px 60px;
     opacity: 0.5;
     pointer-events: none;
@@ -81,7 +132,7 @@
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-accent);
-    text-shadow: 0 0 40px rgba(240, 217, 160, 0.3);
+    text-shadow: var(--shadow-menu-title);
     text-align: center;
 }
 
@@ -93,27 +144,27 @@
     font-size: var(--fs-btn);
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: #1a1a1a;
+    color: var(--color-text-btn);
     background: var(--color-accent);
     border: none;
     cursor: pointer;
     clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
-    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
-    box-shadow: 4px 4px 0px #8b6914;
+    transition: background var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+    box-shadow: var(--shadow-menu-btn);
 }
 
 .menu__btn:hover {
     background: var(--color-accent-hover);
     transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0px #8b6914;
+    box-shadow: var(--shadow-menu-btn-hover);
 }
 
 .menu__btn:active {
     transform: translate(2px, 2px);
-    box-shadow: 2px 2px 0px #8b6914;
+    box-shadow: var(--shadow-menu-btn-active);
 }
 
-/* ІГРОВА СЕКЦІЯ ТА UI  */
+/* ІГРОВА СЕКЦІЯ  */
 .game-section {
     width: 100%;
     min-height: 100dvh;
@@ -123,13 +174,13 @@
     justify-content: center;
     gap: var(--gap-section);
     padding: 20px;
-
     background-image: url('https://images.unsplash.com/photo-1551269901-5c5e14c25df7?q=80&w=1920&auto=format&fit=crop');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
-    box-shadow: inset 0 0 0 2000px rgba(0, 0, 0, 0.65);
+    box-shadow: inset 0 0 0 2000px var(--color-bg-game-overlay);
     font-family: var(--font-main);
+    position: relative; 
 }
 
 .game-section__title {
@@ -138,7 +189,7 @@
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 2px;
-    text-shadow: 2px 4px 10px rgba(0, 0, 0, 0.8);
+    text-shadow: var(--shadow-section-title);
     text-align: center;
 }
 
@@ -161,36 +212,34 @@
     font-size: var(--fs-timer);
     font-weight: bold;
     font-family: monospace;
-    background: #222;
+    background: var(--color-bg-timer);
     color: var(--color-timer-glow);
     padding: var(--pad-info-y) var(--pad-timer-x);
-    border-radius: 10px;
+    border-radius: var(--radius-info);
     min-width: var(--width-timer);
     text-align: center;
-    box-shadow: 0 0 10px var(--color-timer-glow);
+    box-shadow: var(--shadow-timer);
 }
 
 .game-info__turn {
     font-size: var(--fs-turn);
     font-weight: 600;
     padding: var(--pad-info-y) var(--pad-turn-x);
-    border-radius: 12px;
-    background: linear-gradient(135deg, #2b2b2b, #1a1a1a);
+    border-radius: var(--radius-turn);
+    background: linear-gradient(135deg, var(--color-bg-turn-start), var(--color-bg-turn-end));
     color: var(--color-text-main);
     letter-spacing: 1px;
     text-transform: uppercase;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-    border: 2px solid #444;
+    box-shadow: var(--shadow-turn);
+    border: var(--border-turn);
 }
 
-/* ІГРОВА ДОШКА  */
+/*ІГРОВА ДОШКА */
 .board {
     display: grid;
-    grid-template-columns: repeat(8, var(--square-size));
-    grid-template-rows: repeat(8, var(--square-size));
     border: var(--board-border-size) solid var(--color-board-border);
     border-radius: 4px;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8), inset 0 0 10px rgba(0,0,0,0.5);
+    box-shadow: var(--shadow-board);
     background-color: var(--color-board-border);
 }
 
@@ -209,7 +258,7 @@
     background-color: var(--color-black-square); 
 }
 
-/* ШАШКИ  */
+/*ШАШКИ  */
 .checker {
     width: var(--checker-size);
     height: var(--checker-size);
@@ -217,7 +266,7 @@
     cursor: pointer;
     border: none;
     outline: none;
-    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: all var(--transition-fast);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -231,55 +280,43 @@
     border-radius: 50%;
 }
 
-.checker::before {
-    width: 70%;
-    height: 70%;
-}
-
-.checker::after {
-    width: 35%;
-    height: 35%;
-}
+.checker::before { width: 70%; height: 70%; }
+.checker::after { width: 35%; height: 35%; }
 
 /* --- Світла шашка --- */
 .checker--light {
     background-color: var(--color-checker-light);
-    box-shadow: 
-        0 4px 5px rgba(0,0,0,0.3), 
-        inset 0 -3px 4px rgba(0,0,0,0.2), 
-        inset 0 3px 4px rgba(255,255,255,0.8);
+    box-shadow: var(--shadow-checker-light);
 }
 
 .checker--light::before {
     border: 1.5px solid var(--color-checker-light-border);
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1), 0 2px 2px rgba(255,255,255,0.9);
+    box-shadow: var(--shadow-checker-light-before);
 }
 
 .checker--light::after {
     background-color: var(--color-checker-light);
     border: 1px solid var(--color-checker-light-border);
-    box-shadow: inset 0 2px 2px rgba(255,255,255,0.8), 0 2px 3px rgba(0,0,0,0.1);
+    box-shadow: var(--shadow-checker-light-after);
 }
 
 /* --- Темна шашка --- */
 .checker--dark {
     background-color: var(--color-checker-dark);
-    box-shadow: 
-        0 4px 5px rgba(0,0,0,0.4), 
-        inset 0 -3px 4px rgba(0,0,0,0.6), 
-        inset 0 3px 4px rgba(255,255,255,0.2);
+    box-shadow: var(--shadow-checker-dark);
 }
 
 .checker--dark::before {
     border: 1.5px solid var(--color-checker-dark-border);
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 1px 1px rgba(255,255,255,0.1);
+    box-shadow: var(--shadow-checker-dark-before);
 }
 
 .checker--dark::after {
     background-color: var(--color-checker-dark);
     border: 1px solid var(--color-checker-dark-border);
-    box-shadow: inset 0 1px 2px rgba(255,255,255,0.1), 0 2px 3px rgba(0,0,0,0.4);
+    box-shadow: var(--shadow-checker-dark-after);
 }
+
 
 .checker:hover {
     transform: translateY(-2px);
@@ -287,10 +324,83 @@
 
 .checker.is-selected {
     transform: translateY(-5px) scale(1.05);
-    box-shadow: 
-        0 0 0 3px #ff4757, 
-        0 12px 20px rgba(0,0,0,0.5), 
-        inset 0 -3px 4px rgba(0,0,0,0.3), 
-        inset 0 2px 3px rgba(255,255,255,0.7);
+    box-shadow: var(--shadow-checker-selected);
     z-index: 10;
+}
+
+
+.is-highlighted {
+    position: relative;
+    cursor: pointer;
+}
+
+.is-highlighted::after {
+    content: '';
+    position: absolute;
+    width: var(--square-size); 
+    height: var(--square-size);
+    background-color: var(--color-highlight-base);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: var(--shadow-highlight);
+    z-index: 5;
+}
+
+.is-highlighted:hover::after {
+    background-color: var(--color-highlight-hover);
+}
+
+
+.checker--king {
+    border: 3px solid var(--color-checker-king-border); 
+    position: relative;
+}
+
+.checker--king::after {
+    content: "👑";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: var(--fs-king-crown); 
+}
+
+/* ВІКНО ПЕРЕМОГИ  */
+.win-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--color-bg-win-message);
+    padding: var(--pad-win-message);
+    border-radius: var(--radius-win);
+    box-shadow: var(--shadow-win-message);
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    z-index: 10; 
+    text-align: center;
+}
+
+.win-message h3 {
+    margin: 0;
+    font-size: var(--fs-win-title);
+    color: var(--color-text-dark);
+}
+
+.btn-restart {
+    padding: var(--pad-win-btn);
+    font-size: var(--fs-win-btn);
+    font-weight: bold;
+    background-color: var(--color-btn-restart);
+    color: var(--color-text-main);
+    border: none;
+    border-radius: var(--radius-btn);
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+}
+
+.btn-restart:hover {
+    background-color: var(--color-btn-restart-hover);
 }
