@@ -1,9 +1,5 @@
 export class CheckersController {
-    #model;
-    #view;
-    #selectedCell;
-    #validMoves;
-    #isAnimating;
+    #model; #view; #selectedCell; #validMoves; #isAnimating;
 
     constructor(model, view) {
         this.#model = model;
@@ -12,63 +8,47 @@ export class CheckersController {
         this.#validMoves = [];
         this.#isAnimating = false;
 
-        this.#view.bindSquareClick((row, col) => this.#handleSquareClick(row, col));
+        this.#view.bindSquareClick((r, c) => this.#handleSquareClick(r, c));
         this.#view.bindRestartClick(() => this.#handleRestartGame());
-        
         this.#updateView();
     }
 
     #handleSquareClick(row, col) {
-        if (this.#isAnimating) return; 
-        if (this.#model.winner) return; 
+        if (this.#isAnimating || this.#model.winner) return;
 
         const moveTarget = this.#validMoves.find(m => m.r === row && m.c === col);
+        
         if (moveTarget && this.#selectedCell) {
             this.#isAnimating = true;
             this.#view.hideSelectionAndHighlights(); 
 
             this.#view.animateMove(this.#selectedCell.r, this.#selectedCell.c, row, col, () => {
                 const turnComplete = this.#model.movePiece(this.#selectedCell.r, this.#selectedCell.c, row, col, moveTarget);
-                
                 if (!turnComplete) {
                     this.#selectedCell = { r: row, c: col };
                     this.#validMoves = this.#model.getValidMoves(row, col); 
                 } else {
-                    this.#clearSelection();
+                    this.#selectedCell = null;
+                    this.#validMoves = [];
                 }
-
                 this.#updateView();
                 this.#isAnimating = false;
-
-                if (this.#model.winner) {
-                    this.#view.showWinner(this.#model.winner);
-                }
+                if (this.#model.winner) this.#view.showWinner(this.#model.winner);
             });
             return;
         }
 
-        if (this.#model.multiJumpPiece) { return; }
+        if (this.#model.multiJumpPiece) return;
 
-        const board = this.#model.board;
-        const clickedValue = board[row][col];
-        
-        const isCurrentLight = this.#model.currentTurn === 1 && (clickedValue === 1 || clickedValue === 3);
-        const isCurrentDark = this.#model.currentTurn === 2 && (clickedValue === 2 || clickedValue === 4);
-
-        if (isCurrentLight || isCurrentDark) {
+        const piece = this.#model.board[row][col];
+        if (piece !== null && piece.player === this.#model.currentTurn) {
             this.#selectedCell = { r: row, c: col };
             this.#validMoves = this.#model.getValidMoves(row, col);
-            this.#updateView();
-            return;
+        } else {
+            this.#selectedCell = null;
+            this.#validMoves = [];
         }
-
-        this.#clearSelection();
         this.#updateView();
-    }
-
-    #clearSelection() {
-        this.#selectedCell = null;
-        this.#validMoves = [];
     }
 
     #updateView() {
@@ -76,9 +56,10 @@ export class CheckersController {
     }
 
     #handleRestartGame() {
-        this.#model.resetGame(); 
-        this.#clearSelection();  
-        this.#view.hideWinner(); 
-        this.#updateView();      
+        this.#model.resetGame();
+        this.#selectedCell = null;
+        this.#validMoves = [];
+        this.#view.hideWinner();
+        this.#updateView();
     }
 }

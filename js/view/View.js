@@ -1,165 +1,132 @@
 import { BOARD, PLAYERS, CSS } from '../constants.js';
+import { AnimationHelper } from './AnimationHelper.js';
 
 export class CheckersView {
-    #root;
-    #boardElement;
-    #onSquareClick; 
-    #onRestartClick; 
-    winMessage;
-    winTextElement;
+    #root; #boardElement; #onSquareClick; #onRestartClick; #winMessage; #winText;
 
-    constructor(rootElement) {
-        this.#root = rootElement;
+    constructor(root) {
+        this.#root = root;
         this.#createLayout();
     }
 
     #createLayout() {
-        this.#root.innerHTML = ''; 
-        
-        const section = document.createElement("main");
-        section.classList.add("game-section");
-        
-        const title = document.createElement("h2");
-        title.classList.add("game-section__title");
-        title.textContent = "Checkers";
+        this.#root.innerHTML = '';
+        const main = document.createElement("main");
+        main.className = "game-section";
         
         this.#boardElement = document.createElement("div");
-        this.#boardElement.classList.add(CSS.BOARD);
+        this.#boardElement.className = CSS.BOARD;
 
-        this.winMessage = document.createElement("div");
-        this.winMessage.classList.add("win-message");
-        this.winMessage.style.display = "none"; 
-
-        this.winTextElement = document.createElement("h3");
-
-        const restartButton = document.createElement("button");
-        restartButton.textContent = "Play Again";
-        restartButton.classList.add("btn-restart");
-        restartButton.addEventListener('click', () => {
-            if (this.#onRestartClick) this.#onRestartClick();
-        });
-
-        this.winMessage.append(this.winTextElement, restartButton);
-        section.append(title, this.#boardElement, this.winMessage);
-        this.#root.append(section);
-
-        this.#boardElement.addEventListener('click', (e) => this.#handleClick(e));
-    }
-
-    bindSquareClick(handler) {
-        this.#onSquareClick = handler;
-    }
-
-    bindRestartClick(handler) {
-        this.#onRestartClick = handler;
-    }
-
-    #handleClick(e) {
-        const cell = e.target.closest(`.${CSS.CELL}`);
-        if (!cell) return;
-
-        const row = parseInt(cell.dataset.row);
-        const col = parseInt(cell.dataset.col);
+        this.#winMessage = document.createElement("div");
+        this.#winMessage.className = "win-message";
+        this.#winMessage.style.display = "none";
+        this.#winText = document.createElement("h3");
         
-        if (this.#onSquareClick) {
-            this.#onSquareClick(row, col);
-        }
+        const btn = document.createElement("button");
+        btn.textContent = "Play Again";
+        btn.className = "btn-restart";
+        btn.onclick = () => this.#onRestartClick?.();
+
+        this.#winMessage.append(this.#winText, btn);
+        main.append(this.#boardElement, this.#winMessage);
+        this.#root.append(main);
+
+        this.#boardElement.onclick = (e) => {
+            const cell = e.target.closest(`.${CSS.CELL}`);
+            if (cell) this.#onSquareClick?.(parseInt(cell.dataset.row), parseInt(cell.dataset.col));
+        };
     }
 
-    hideSelectionAndHighlights() {
-        const highlighted = this.#boardElement.querySelectorAll(`.${CSS.HIGHLIGHT}`);
-        const selected = this.#boardElement.querySelectorAll(`.${CSS.SELECTED}`);
-        highlighted.forEach(el => el.classList.remove(CSS.HIGHLIGHT));
-        selected.forEach(el => el.classList.remove(CSS.SELECTED));
-    }
+    bindSquareClick(h) { this.#onSquareClick = h; }
+    bindRestartClick(h) { this.#onRestartClick = h; }
 
-    animateMove(fromR, fromC, toR, toC, onComplete) {
-        const startCell = this.#boardElement.querySelector(`[data-row="${fromR}"][data-col="${fromC}"]`);
-        const endCell = this.#boardElement.querySelector(`[data-row="${toR}"][data-col="${toC}"]`);
-        
-        if (!startCell || !endCell) { onComplete(); return; }
 
-        const piece = startCell.querySelector(`.${CSS.CHECKER}`);
-        if (!piece) { onComplete(); return; }
-
-        const startRect = piece.getBoundingClientRect();
-        const endRect = endCell.getBoundingClientRect();
-
-        const clone = piece.cloneNode(true);
-        clone.style.position = 'fixed';
-        clone.style.top = `${startRect.top}px`;
-        clone.style.left = `${startRect.left}px`;
-        clone.style.margin = '0';
-        clone.style.zIndex = '1000';
-        clone.style.pointerEvents = 'none'; 
-        document.body.appendChild(clone);
-        
-        piece.style.opacity = '0'; 
-
-        const deltaX = endRect.left - startRect.left + (endRect.width - startRect.width) / 2;
-        const deltaY = endRect.top - startRect.top + (endRect.height - startRect.height) / 2;
-
-        const animation = clone.animate([
-            { transform: 'translate(0, 0)' },
-            { transform: `translate(${deltaX}px, ${deltaY}px)` }
-        ], { duration: 300, easing: 'ease-in-out' });
-
-        animation.onfinish = () => { clone.remove(); onComplete(); };
-    }
 
     renderBoard(boardData, selectedCell = null, validMoves = []) {
         this.#boardElement.innerHTML = ''; 
 
+   
         this.#boardElement.style.gridTemplateColumns = `repeat(${BOARD.COLS}, var(--square-size))`;
         this.#boardElement.style.gridTemplateRows = `repeat(${BOARD.ROWS}, var(--square-size))`;
 
+
         for (let r = 0; r < BOARD.ROWS; r++) {
             for (let c = 0; c < BOARD.COLS; c++) {
-                const cellValue = boardData[r][c];
                 const cell = document.createElement('div');
-                
                 cell.classList.add(CSS.CELL);
-                cell.classList.add((r + c) % 2 === 0 ? CSS.CELL_WHITE : CSS.CELL_BLACK);
+
+                if ((r + c) % 2 === 0) {
+                    cell.classList.add(CSS.CELL_WHITE);
+                } else {
+                    cell.classList.add(CSS.CELL_BLACK);
+                }
                 
                 cell.dataset.row = r;
                 cell.dataset.col = c;
 
-                if (cellValue !== PLAYERS.EMPTY) {
-                    const checker = document.createElement('button');
+                const pieceObj = boardData[r][c]; 
+
+                if (pieceObj !== null) {
+                    const checker = document.createElement('div');
                     checker.classList.add(CSS.CHECKER);
-                    
-                    if (cellValue === PLAYERS.LIGHT || cellValue === PLAYERS.LIGHT_KING) checker.classList.add(CSS.CHECKER_LIGHT);
-                    if (cellValue === PLAYERS.DARK || cellValue === PLAYERS.DARK_KING) checker.classList.add(CSS.CHECKER_DARK);
-                    
-                    if (cellValue === PLAYERS.LIGHT_KING || cellValue === PLAYERS.DARK_KING) {
+
+                    if (pieceObj.player === PLAYERS.LIGHT) {
+                        checker.classList.add(CSS.CHECKER_LIGHT);
+                    } else {
+                        checker.classList.add(CSS.CHECKER_DARK);
+                    }
+
+                    if (pieceObj.isKing === true) {
                         checker.classList.add(CSS.CHECKER_KING);
                     }
-                    
-                    if (selectedCell && selectedCell.r === r && selectedCell.c === c) {
-                        checker.classList.add(CSS.SELECTED);
-                    }
-                    cell.append(checker);
+
+                    cell.appendChild(checker);
                 }
 
-                const isMoveTarget = validMoves.find(m => m.r === r && m.c === c);
-                if (isMoveTarget) { cell.classList.add(CSS.HIGHLIGHT); }
+                let isHighlighted = false;
+                for (let i = 0; i < validMoves.length; i++) {
+                    if (validMoves[i].r === r && validMoves[i].c === c) {
+                        isHighlighted = true;
+                        break; 
+                    }
+                }
 
+                if (isHighlighted === true) {
+                    cell.classList.add(CSS.HIGHLIGHT);
+                }
+                if (selectedCell !== null) {
+                    if (selectedCell.r === r && selectedCell.c === c) {
+                        cell.classList.add(CSS.SELECTED);
+                    }
+                }
+
+                
                 this.#boardElement.append(cell);
             }
         }
     }
 
-    showWinner(winnerId) {
-        const winnerName = winnerId === PLAYERS.LIGHT ? "White" : "Black";
-        this.winTextElement.textContent = `${winnerName} Wins!`;
-        this.winMessage.style.display = "flex"; 
-        this.#boardElement.style.opacity = "0.5"; 
-        this.#boardElement.style.pointerEvents = "none"; 
+    animateMove(fR, fC, tR, tC, done) {
+        const piece = this.#boardElement.querySelector(`[data-row="${fR}"][data-col="${fC}"] .${CSS.CHECKER}`);
+        const target = this.#boardElement.querySelector(`[data-row="${tR}"][data-col="${tC}"]`);
+        if (piece && target) AnimationHelper.movePiece(piece, target, done);
+        else done();
+    }
+
+    hideSelectionAndHighlights() {
+        this.#boardElement.querySelectorAll('.is-selected, .is-highlighted').forEach(el => {
+            el.classList.remove('is-selected', 'is-highlighted');
+        });
+    }
+
+    showWinner(id) {
+        this.#winText.textContent = `${id === PLAYERS.LIGHT ? "White" : "Black"} Wins!`;
+        this.#winMessage.style.display = "flex";
+        this.#boardElement.style.pointerEvents = "none";
     }
 
     hideWinner() {
-        this.winMessage.style.display = "none";
-        this.#boardElement.style.opacity = "1";
+        this.#winMessage.style.display = "none";
         this.#boardElement.style.pointerEvents = "auto";
     }
 }

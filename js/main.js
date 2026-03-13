@@ -1,4 +1,4 @@
-import { CheckersModel } from './models/Model.js';
+import { CheckersModel } from './models/CheckersModel.js';
 import { CheckersView } from './view/View.js';
 import { CheckersController } from './Controller/Controller.js';
 
