@@ -1,4 +1,4 @@
-import { BOARD, PLAYERS } from '../constants.js';
+import { BOARD, PLAYERS } from '../Сonstants.js';
 import { Piece } from './Piece.js';
 
 export class Board {
@@ -9,43 +9,39 @@ export class Board {
 
     reset() {
         this.grid = [];
-        for (let r = 0; r < BOARD.ROWS; r++) {
-            let row = [];
-            for (let c = 0; c < BOARD.COLS; c++) {
-                row.push(null); 
+        for (let row = 0; row < BOARD.ROWS; row++) {
+            let gridRow = [];
+            for (let col = 0; col < BOARD.COLS; col++) {
+                gridRow.push(null); 
             }
-            this.grid.push(row);
+            this.grid.push(gridRow);
         }
         
-        for (let r = 0; r < BOARD.ROWS; r++) {
-            for (let c = 0; c < BOARD.COLS; c++) {
-                if ((r + c) % 2 !== 0) {
-                    if (r < BOARD.PIECE_ROWS) {
-                        this.grid[r][c] = new Piece(PLAYERS.DARK);
+        for (let row = 0; row < BOARD.ROWS; row++) {
+            for (let col = 0; col < BOARD.COLS; col++) {
+                if ((row + col) % 2 !== 0) {
+                    if (row < BOARD.PIECE_ROWS) {
+                        this.grid[row][col] = new Piece(PLAYERS.DARK);
                     } 
-                    else if (r >= BOARD.ROWS - BOARD.PIECE_ROWS) {
-                        this.grid[r][c] = new Piece(PLAYERS.LIGHT);
+                    else if (row >= BOARD.ROWS - BOARD.PIECE_ROWS) {
+                        this.grid[row][col] = new Piece(PLAYERS.LIGHT);
                     }
                 }
             }
         }
     }
 
-    getPiece(r, c) { return this.grid[r][c]; }
-    setPiece(r, c, piece) { this.grid[r][c] = piece; }
-    remove(r, c) { this.grid[r][c] = null; }
+    getPiece(row, col) { return this.grid[row][col]; }
+    setPiece(row, col, piece) { this.grid[row][col] = piece; }
+    remove(row, col) { this.grid[row][col] = null; }
 
-    move(fromR, fromC, toR, toC) {
-        const piece = this.grid[fromR][fromC];
-        this.grid[toR][toC] = piece;
-        this.grid[fromR][fromC] = null;
+    move(fromRow, fromCol, toRow, toCol) {
+        const piece = this.grid[fromRow][fromCol];
+        this.grid[toRow][toCol] = piece;
+        this.grid[fromRow][fromCol] = null;
     }
 
-    isValidPosition(r, c) {
-        if (r >= 0 && r < BOARD.ROWS && c >= 0 && c < BOARD.COLS) {
-            return true;
-        } else {
-            return false;
-        }
+    isValidPosition(row, col) {
+        return row >= 0 && row < BOARD.ROWS && col >= 0 && col < BOARD.COLS;
     }
 }

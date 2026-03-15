@@ -21,17 +21,16 @@ export class CheckersModel {
         return MoveValidator.getValidMoves(this.#state, row, col);
     }
 
-    movePiece(fromR, fromC, toR, toC, moveInfo) {
-        const result = this.#state.executeMove(fromR, fromC, toR, toC, moveInfo);
+    movePiece(fromRow, fromCol, toRow, toCol, moveInfo) {
+        const result = this.#state.executeMove(fromRow, fromCol, toRow, toCol, moveInfo);
 
         if (moveInfo.type === 'capture' && !result.becameKing) {
-            if (MoveValidator.getCapturesForPiece(this.#state, toR, toC).length > 0) {
-                this.#state.setMultiJumpPiece(toR, toC); 
+            if (MoveValidator.getCapturesForPiece(this.#state, toRow, toCol).length > 0) {
+                this.#state.setMultiJumpPiece(toRow, toCol); 
                 return false; 
             }
         }
 
-        
         this.#state.clearMultiJumpPiece();
         this.#state.switchTurn();
 

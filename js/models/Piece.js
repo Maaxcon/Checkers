@@ -1,4 +1,4 @@
-import { PLAYERS } from '../constants.js';
+import { PLAYERS, DIRECTIONS } from '../Сonstants.js';
 
 export class Piece {
     constructor(playerType) {
@@ -7,34 +7,24 @@ export class Piece {
     }
 
     get isLight() {
-        if (this.player === PLAYERS.LIGHT) {
-            return true;
-        } else {
-            return false;
-        }
+        return this.player === PLAYERS.LIGHT;
     }
 
     get moveDirections() {
         if (this.isKing === true) {
-            return [-1, 1]; 
+            return [DIRECTIONS.UP, DIRECTIONS.DOWN]; 
         } else {
             if (this.isLight === true) {
-                return [-1]; 
+                return [DIRECTIONS.UP]; 
             } else {
-                return [1];  
+                return [DIRECTIONS.DOWN];  
             }
         }
     }
 
     isOpponent(otherPiece) {
-        if (otherPiece === null) {
-            return false;
-        }
-        if (this.player !== otherPiece.player) {
-            return true;
-        } else {
-            return false;
-        }
+        if (otherPiece === null) return false;
+        return this.player !== otherPiece.player;
     }
 
     makeKing() {

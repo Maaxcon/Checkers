@@ -1,6 +1,6 @@
 import { CheckersModel } from './models/CheckersModel.js';
 import { CheckersView } from './view/View.js';
-import { CheckersController } from './Controller/Controller.js';
+import { CheckersController } from './controller/Controller.js';
 
 document.addEventListener("DOMContentLoaded", () => {
     const root = document.querySelector(".root");

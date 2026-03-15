@@ -1,11 +1,11 @@
+import { GAME_SETTINGS } from '../Сonstants.js';
+
 export class MoveEngine {
     
     static getMovesForPiece(board, row, col) {
         const piece = board.getPiece(row, col);
         
-        if (piece === null) {
-            return []; 
-        }
+        if (piece === null) return []; 
         
         if (piece.isKing === true) {
             return this.getKingMoves(board, row, col, piece);
@@ -16,41 +16,40 @@ export class MoveEngine {
 
     static getNormalPieceMoves(board, row, col, piece) {
         const moves = [];
-        
         const directionsY = piece.moveDirections;
         const directionsX = [-1, 1];
 
         for (let i = 0; i < directionsY.length; i++) {
-            const dirY = directionsY[i];
+            const directionY = directionsY[i];
             
             for (let j = 0; j < directionsX.length; j++) {
-                const dirX = directionsX[j];
-                const newRow = row + dirY;
-                const newCol = col + dirX;
+                const directionX = directionsX[j];
+                const newRow = row + directionY;
+                const newCol = col + directionX;
                 
                 if (board.isValidPosition(newRow, newCol)) {
                     const targetPiece = board.getPiece(newRow, newCol);
                     if (targetPiece === null) {
-                        moves.push({ r: newRow, c: newCol, type: 'move' });
+                        moves.push({ row: newRow, col: newCol, type: 'move' });
                     }
                 }
             }
         }
 
-        const captureDirs = [
-            {r: -1, c: -1}, 
-            {r: -1, c: 1}, 
-            {r: 1, c: -1}, 
-            {r: 1, c: 1}
+        const captureDirections = [
+            {rowOffset: -1, colOffset: -1}, 
+            {rowOffset: -1, colOffset: 1}, 
+            {rowOffset: 1, colOffset: -1}, 
+            {rowOffset: 1, colOffset: 1}
         ];
         
-        for (let i = 0; i < captureDirs.length; i++) {
-            const dir = captureDirs[i];
+        for (let i = 0; i < captureDirections.length; i++) {
+            const direction = captureDirections[i];
             
-            const jumpRow = row + (dir.r * 2);
-            const jumpCol = col + (dir.c * 2);
-            const middleRow = row + dir.r;
-            const middleCol = col + dir.c;
+            const jumpRow = row + (direction.rowOffset * GAME_SETTINGS.JUMP_DISTANCE);
+            const jumpCol = col + (direction.colOffset * GAME_SETTINGS.JUMP_DISTANCE);
+            const middleRow = row + direction.rowOffset;
+            const middleCol = col + direction.colOffset;
 
             if (board.isValidPosition(jumpRow, jumpCol)) {
                 const middlePiece = board.getPiece(middleRow, middleCol);
@@ -59,11 +58,11 @@ export class MoveEngine {
                 if (targetPiece === null) {
                     if (piece.isOpponent(middlePiece) === true) {
                         moves.push({ 
-                            r: jumpRow, 
-                            c: jumpCol, 
+                            row: jumpRow, 
+                            col: jumpCol, 
                             type: 'capture', 
-                            capturedR: middleRow, 
-                            capturedC: middleCol 
+                            capturedRow: middleRow, 
+                            capturedCol: middleCol 
                         });
                     }
                 }
@@ -75,17 +74,17 @@ export class MoveEngine {
 
     static getKingMoves(board, row, col, piece) {
         const moves = [];
-        const dirs = [
-            {r: -1, c: -1}, 
-            {r: -1, c: 1}, 
-            {r: 1, c: -1}, 
-            {r: 1, c: 1}
+        const directions = [
+            {rowOffset: -1, colOffset: -1}, 
+            {rowOffset: -1, colOffset: 1}, 
+            {rowOffset: 1, colOffset: -1}, 
+            {rowOffset: 1, colOffset: 1}
         ]; 
 
-        for (let i = 0; i < dirs.length; i++) {
-            const dir = dirs[i];
-            let currentRow = row + dir.r;
-            let currentCol = col + dir.c;
+        for (let i = 0; i < directions.length; i++) {
+            const direction = directions[i];
+            let currentRow = row + direction.rowOffset;
+            let currentCol = col + direction.colOffset;
             let foundEnemy = null; 
 
             while (board.isValidPosition(currentRow, currentCol)) {
@@ -93,28 +92,28 @@ export class MoveEngine {
 
                 if (foundEnemy === null) {
                     if (targetPiece === null) {
-                        moves.push({ r: currentRow, c: currentCol, type: 'move' });
+                        moves.push({ row: currentRow, col: currentCol, type: 'move' });
                     } else if (piece.isOpponent(targetPiece) === true) {
-                        foundEnemy = { r: currentRow, c: currentCol };
+                        foundEnemy = { row: currentRow, col: currentCol };
                     } else {
                         break; 
                     }
                 } else {
                     if (targetPiece === null) {
                         moves.push({ 
-                            r: currentRow, 
-                            c: currentCol, 
+                            row: currentRow, 
+                            col: currentCol, 
                             type: 'capture', 
-                            capturedR: foundEnemy.r, 
-                            capturedC: foundEnemy.c 
+                            capturedRow: foundEnemy.row, 
+                            capturedCol: foundEnemy.col 
                         });
                     } else {
                         break; 
                     }
                 }
                 
-                currentRow = currentRow + dir.r;
-                currentCol = currentCol + dir.c;
+                currentRow = currentRow + direction.rowOffset;
+                currentCol = currentCol + direction.colOffset;
             }
         }
 

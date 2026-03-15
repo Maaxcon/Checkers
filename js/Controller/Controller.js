@@ -8,7 +8,7 @@ export class CheckersController {
         this.#validMoves = [];
         this.#isAnimating = false;
 
-        this.#view.bindSquareClick((r, c) => this.#handleSquareClick(r, c));
+        this.#view.bindSquareClick((row, col) => this.#handleSquareClick(row, col));
         this.#view.bindRestartClick(() => this.#handleRestartGame());
         this.#updateView();
     }
@@ -16,16 +16,16 @@ export class CheckersController {
     #handleSquareClick(row, col) {
         if (this.#isAnimating || this.#model.winner) return;
 
-        const moveTarget = this.#validMoves.find(m => m.r === row && m.c === col);
+        const moveTarget = this.#validMoves.find(m => m.row === row && m.col === col);
         
         if (moveTarget && this.#selectedCell) {
             this.#isAnimating = true;
             this.#view.hideSelectionAndHighlights(); 
 
-            this.#view.animateMove(this.#selectedCell.r, this.#selectedCell.c, row, col, () => {
-                const turnComplete = this.#model.movePiece(this.#selectedCell.r, this.#selectedCell.c, row, col, moveTarget);
+            this.#view.animateMove(this.#selectedCell.row, this.#selectedCell.col, row, col, () => {
+                const turnComplete = this.#model.movePiece(this.#selectedCell.row, this.#selectedCell.col, row, col, moveTarget);
                 if (!turnComplete) {
-                    this.#selectedCell = { r: row, c: col };
+                    this.#selectedCell = { row: row, col: col };
                     this.#validMoves = this.#model.getValidMoves(row, col); 
                 } else {
                     this.#selectedCell = null;
@@ -42,7 +42,7 @@ export class CheckersController {
 
         const piece = this.#model.board[row][col];
         if (piece !== null && piece.player === this.#model.currentTurn) {
-            this.#selectedCell = { r: row, c: col };
+            this.#selectedCell = { row: row, col: col };
             this.#validMoves = this.#model.getValidMoves(row, col);
         } else {
             this.#selectedCell = null;

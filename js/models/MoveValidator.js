@@ -1,17 +1,11 @@
-import { PLAYERS, BOARD } from '../constants.js';
+import { PLAYERS, BOARD } from '../Сonstants.js';
 import { MoveEngine } from './MoveEngine.js';
 
 export class MoveValidator {
     
     static isCurrentPlayerPiece(gameState, piece) {
-        if (piece === null) {
-            return false;
-        }
-        if (piece.player === gameState.currentTurn) {
-            return true; 
-        } else {
-            return false;
-        }
+        if (piece === null) return false;
+        return piece.player === gameState.currentTurn;
     }
 
     static getCapturesForPiece(gameState, row, col) {
@@ -20,34 +14,29 @@ export class MoveValidator {
     }
 
     static playerHasAnyCaptures(gameState) {
-        for (let r = 0; r < BOARD.ROWS; r++) {
-            for (let c = 0; c < BOARD.COLS; c++) {
-                
-                const piece = gameState.board.getPiece(r, c);
+        for (let row = 0; row < BOARD.ROWS; row++) {
+            for (let col = 0; col < BOARD.COLS; col++) {
+                const piece = gameState.board.getPiece(row, col);
 
                 if (this.isCurrentPlayerPiece(gameState, piece)) {
-                    const captures = this.getCapturesForPiece(gameState, r, c)
+                    const captures = this.getCapturesForPiece(gameState, row, col);
                     if (captures.length > 0) {
                         return true; 
                     }
                 }
-
             }
         }
         return false;
     }
 
-    
     static getValidMoves(gameState, row, col) {
-    
         if (gameState.winner) return []; 
         const piece = gameState.board.getPiece(row, col);
         if (!this.isCurrentPlayerPiece(gameState, piece)) return []; 
 
-    
         const lockedPiece = gameState.multiJumpPiece;
         if (lockedPiece) {
-            const isClickingAnotherPiece = (lockedPiece.r !== row || lockedPiece.c !== col);
+            const isClickingAnotherPiece = (lockedPiece.row !== row || lockedPiece.col !== col);
             if (isClickingAnotherPiece) {
                 return []; 
             }
@@ -59,33 +48,23 @@ export class MoveValidator {
             return allMoves.filter(move => move.type === 'capture');
         }
 
-        
         return allMoves;
     }
 
     static calculateWinner(gameState) {
-        for (let r = 0; r < BOARD.ROWS; r++) {
-            for (let c = 0; c < BOARD.COLS; c++) {
-                
-                const piece = gameState.board.getPiece(r, c);
+        for (let row = 0; row < BOARD.ROWS; row++) {
+            for (let col = 0; col < BOARD.COLS; col++) {
+                const piece = gameState.board.getPiece(row, col);
 
                 if (this.isCurrentPlayerPiece(gameState, piece)) {
-                    const validMoves = this.getValidMoves(gameState, r, c);
-                    
-                   
+                    const validMoves = this.getValidMoves(gameState, row, col);
                     if (validMoves.length > 0) {
                         return null; 
                     }
                 }
-
             }
         }
 
-       
-        if (gameState.currentTurn === PLAYERS.LIGHT) {
-            return PLAYERS.DARK;
-        } else {
-            return PLAYERS.LIGHT;
-        }
+        return gameState.currentTurn === PLAYERS.LIGHT ? PLAYERS.DARK : PLAYERS.LIGHT;
     }
 }

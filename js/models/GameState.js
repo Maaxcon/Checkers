@@ -1,4 +1,4 @@
-import { PLAYERS, BOARD } from '../constants.js';
+import { PLAYERS, BOARD } from '../Сonstants.js';
 import { Board } from './Board.js';
 
 export class GameState {
@@ -19,42 +19,38 @@ export class GameState {
         this.#winner = null;
     }
 
-    
     get board() { return this.#board; } 
     get boardMatrix() { return this.#board.grid; } 
     get currentTurn() { return this.#currentTurn; }
     get multiJumpPiece() { return this.#multiJumpPiece; }
     get winner() { return this.#winner; }
 
-
     setWinner(player) { this.#winner = player; }
-    setMultiJumpPiece(r, c) { this.#multiJumpPiece = { r, c }; }
+    setMultiJumpPiece(row, col) { this.#multiJumpPiece = { row, col }; }
     clearMultiJumpPiece() { this.#multiJumpPiece = null; }
     
     switchTurn() {
         this.#currentTurn = this.#currentTurn === PLAYERS.LIGHT ? PLAYERS.DARK : PLAYERS.LIGHT;
     }
 
-    
-    executeMove(fromR, fromC, toR, toC, moveInfo) {
-        const piece = this.#board.getPiece(fromR, fromC);
+    executeMove(fromRow, fromCol, toRow, toCol, moveInfo) {
+        const piece = this.#board.getPiece(fromRow, fromCol);
         let wasCapture = false;
 
-        this.#board.move(fromR, fromC, toR, toC);
+        this.#board.move(fromRow, fromCol, toRow, toCol);
 
         if (moveInfo.type === 'capture') {
-            this.#board.remove(moveInfo.capturedR, moveInfo.capturedC);
+            this.#board.remove(moveInfo.capturedRow, moveInfo.capturedCol);
             wasCapture = true;
         }
 
         let becameKing = false;
         
-     
         if (piece.isKing === false) {
-            if (piece.isLight === true && toR === 0) { 
+            if (piece.isLight === true && toRow === BOARD.TOP_ROW) { 
                 piece.makeKing(); 
                 becameKing = true; 
-            } else if (piece.isLight === false && toR === BOARD.ROWS - 1) { 
+            } else if (piece.isLight === false && toRow === BOARD.BOTTOM_ROW) { 
                 piece.makeKing(); 
                 becameKing = true; 
             }

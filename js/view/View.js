@@ -1,8 +1,13 @@
-import { BOARD, PLAYERS, CSS } from '../constants.js';
+import { BOARD, PLAYERS, CSS } from '../Сonstants.js';
 import { AnimationHelper } from './AnimationHelper.js';
 
 export class CheckersView {
-    #root; #boardElement; #onSquareClick; #onRestartClick; #winMessage; #winText;
+    #root; 
+    #boardElement; 
+    #onSquareClick; 
+    #onRestartClick; 
+    #winMessage; 
+    #winText;
 
     constructor(root) {
         this.#root = root;
@@ -37,34 +42,30 @@ export class CheckersView {
         };
     }
 
-    bindSquareClick(h) { this.#onSquareClick = h; }
-    bindRestartClick(h) { this.#onRestartClick = h; }
-
-
+    bindSquareClick(handler) { this.#onSquareClick = handler; }
+    bindRestartClick(handler) { this.#onRestartClick = handler; }
 
     renderBoard(boardData, selectedCell = null, validMoves = []) {
         this.#boardElement.innerHTML = ''; 
 
-   
         this.#boardElement.style.gridTemplateColumns = `repeat(${BOARD.COLS}, var(--square-size))`;
         this.#boardElement.style.gridTemplateRows = `repeat(${BOARD.ROWS}, var(--square-size))`;
 
-
-        for (let r = 0; r < BOARD.ROWS; r++) {
-            for (let c = 0; c < BOARD.COLS; c++) {
+        for (let row = 0; row < BOARD.ROWS; row++) {
+            for (let col = 0; col < BOARD.COLS; col++) {
                 const cell = document.createElement('div');
                 cell.classList.add(CSS.CELL);
 
-                if ((r + c) % 2 === 0) {
+                if ((row + col) % 2 === 0) {
                     cell.classList.add(CSS.CELL_WHITE);
                 } else {
                     cell.classList.add(CSS.CELL_BLACK);
                 }
                 
-                cell.dataset.row = r;
-                cell.dataset.col = c;
+                cell.dataset.row = row;
+                cell.dataset.col = col;
 
-                const pieceObj = boardData[r][c]; 
+                const pieceObj = boardData[row][col]; 
 
                 if (pieceObj !== null) {
                     const checker = document.createElement('div');
@@ -85,7 +86,7 @@ export class CheckersView {
 
                 let isHighlighted = false;
                 for (let i = 0; i < validMoves.length; i++) {
-                    if (validMoves[i].r === r && validMoves[i].c === c) {
+                    if (validMoves[i].row === row && validMoves[i].col === col) {
                         isHighlighted = true;
                         break; 
                     }
@@ -95,22 +96,21 @@ export class CheckersView {
                     cell.classList.add(CSS.HIGHLIGHT);
                 }
                 if (selectedCell !== null) {
-                    if (selectedCell.r === r && selectedCell.c === c) {
+                    if (selectedCell.row === row && selectedCell.col === col) {
                         cell.classList.add(CSS.SELECTED);
                     }
                 }
 
-                
                 this.#boardElement.append(cell);
             }
         }
     }
 
-    animateMove(fR, fC, tR, tC, done) {
-        const piece = this.#boardElement.querySelector(`[data-row="${fR}"][data-col="${fC}"] .${CSS.CHECKER}`);
-        const target = this.#boardElement.querySelector(`[data-row="${tR}"][data-col="${tC}"]`);
-        if (piece && target) AnimationHelper.movePiece(piece, target, done);
-        else done();
+    animateMove(fromRow, fromCol, toRow, toCol, onAnimationComplete) {
+        const piece = this.#boardElement.querySelector(`[data-row="${fromRow}"][data-col="${fromCol}"] .${CSS.CHECKER}`);
+        const target = this.#boardElement.querySelector(`[data-row="${toRow}"][data-col="${toCol}"]`);
+        if (piece && target) AnimationHelper.movePiece(piece, target, onAnimationComplete);
+        else onAnimationComplete();
     }
 
     hideSelectionAndHighlights() {
