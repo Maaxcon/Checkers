@@ -12,7 +12,7 @@
 
     --fs-btn: clamp(0.9rem, 2vw, 1.1rem);
     --fs-king-crown: 0.8rem;
-    --fs-win-title: 2.5rem;
+    --fs-win-title: clamp(1.5rem, 6vw, 2.5rem);
     --fs-win-btn: 1.2rem;
 
     /* Відступи  */
@@ -116,7 +116,6 @@
     background-color: var(--color-black-square); 
 }
 
-/*ШАШКИ  */
 .checker {
     width: var(--checker-size);
     height: var(--checker-size);
@@ -180,7 +179,7 @@
     transform: translateY(-2px);
 }
 
-.checker.is-selected {
+.is-selected .checker {
     transform: translateY(-5px) scale(1.05);
     box-shadow: var(--shadow-checker-selected);
     z-index: 10;
@@ -210,21 +209,25 @@
 }
 
 
+
 .checker--king {
-    border: 3px solid var(--color-checker-king-border); 
-    position: relative;
+    border: 2px solid var(--color-checker-king-border); 
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6) !important; 
 }
+
 
 .checker--king::after {
-    content: "👑";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: var(--fs-king-crown); 
+  content: '';
+  display: block;
+  width: 70%;     
+  height: 70%;   
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23DAA520"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/></svg>');
+  background-size: contain;   
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
-/* ВІКНО ПЕРЕМОГИ  */
+
 .win-message {
     position: absolute;
     top: 50%;
@@ -237,7 +240,7 @@
     flex-direction: column;
     align-items: center;
     gap: 1.5rem;
-    z-index: 10; 
+    z-index: 100; 
     text-align: center;
 }
 
