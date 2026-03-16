@@ -1,5 +1,6 @@
-import { PLAYERS, BOARD } from '../Сonstants.js';
+import { PLAYERS, BOARD } from '../constants.js';
 import { Board } from './Board.js';
+import { Piece } from './Piece.js'; 
 
 export class GameState {
     #board;
@@ -10,6 +11,30 @@ export class GameState {
     constructor() {
         this.#board = new Board();
         this.reset();
+    }
+
+    restore(savedData) {
+        const newGrid = [];
+        for (let row = 0; row < BOARD.ROWS; row++) {
+            let gridRow = [];
+            for (let col = 0; col < BOARD.COLS; col++) {
+                const savedPiece = savedData.grid[row][col];
+                
+                if (savedPiece !== null) {
+                    const alivePiece = new Piece(savedPiece.player);
+                    if (savedPiece.isKing) alivePiece.makeKing();
+                    gridRow.push(alivePiece);
+                } else {
+                    gridRow.push(null);
+                }
+            }
+            newGrid.push(gridRow);
+        }
+
+        this.#board.grid = newGrid;
+        this.#currentTurn = savedData.turn;
+        this.#multiJumpPiece = null; 
+        this.#winner = null;
     }
 
     reset() {
@@ -30,7 +55,11 @@ export class GameState {
     clearMultiJumpPiece() { this.#multiJumpPiece = null; }
     
     switchTurn() {
-        this.#currentTurn = this.#currentTurn === PLAYERS.LIGHT ? PLAYERS.DARK : PLAYERS.LIGHT;
+        if (this.#currentTurn === PLAYERS.LIGHT) {
+            this.#currentTurn = PLAYERS.DARK;
+        } else {
+            this.#currentTurn = PLAYERS.LIGHT;
+        }
     }
 
     executeMove(fromRow, fromCol, toRow, toCol, moveInfo) {

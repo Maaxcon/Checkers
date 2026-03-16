@@ -10,8 +10,18 @@ export class CheckersController {
 
         this.#view.bindSquareClick((row, col) => this.#handleSquareClick(row, col));
         this.#view.bindRestartClick(() => this.#handleRestartGame());
+        this.#view.bindUndoClick(() => this.#handleUndo());
         this.#updateView();
+        
     }
+
+
+    #handleUndo() {
+        this.#model.undo();
+        this.#selectedCell = null;
+        this.#validMoves = [];
+        this.#updateView();
+}
 
     #handleSquareClick(row, col) {
         if (this.#isAnimating || this.#model.winner) return;

@@ -1,4 +1,4 @@
-import { BOARD, PLAYERS } from '../Сonstants.js';
+import { BOARD, PLAYERS } from '../constants.js';
 import { Piece } from './Piece.js';
 
 export class Board {

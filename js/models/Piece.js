@@ -1,4 +1,4 @@
-import { PLAYERS, DIRECTIONS } from '../Сonstants.js';
+import { PLAYERS, DIRECTIONS } from '../constants.js';
 
 export class Piece {
     constructor(playerType) {

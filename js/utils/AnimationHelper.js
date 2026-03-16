@@ -1,4 +1,4 @@
-import { GAME_SETTINGS } from '../Сonstants.js';
+import { GAME_SETTINGS } from '../constants.js';
 
 export class AnimationHelper {
     static movePiece(piece, endCell, onComplete) {

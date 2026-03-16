@@ -1,4 +1,4 @@
-import { PLAYERS, BOARD } from '../Сonstants.js';
+import { PLAYERS, BOARD } from '../constants.js';
 import { MoveEngine } from './MoveEngine.js';
 
 export class MoveValidator {

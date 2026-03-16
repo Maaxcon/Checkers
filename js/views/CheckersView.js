@@ -1,5 +1,5 @@
-import { BOARD, PLAYERS, CSS } from '../Сonstants.js';
-import { AnimationHelper } from './AnimationHelper.js';
+import { BOARD, PLAYERS, CSS } from '../constants.js';
+import { AnimationHelper } from '../utils/AnimationHelper.js';
 
 export class CheckersView {
     #root; 
@@ -8,6 +8,7 @@ export class CheckersView {
     #onRestartClick; 
     #winMessage; 
     #winText;
+    #onUndoClick;
 
     constructor(root) {
         this.#root = root;
@@ -26,14 +27,21 @@ export class CheckersView {
         this.#winMessage.className = "win-message";
         this.#winMessage.style.display = "none";
         this.#winText = document.createElement("h3");
-        
+
+
+        const undoBtn = document.createElement("button");
+        undoBtn.textContent = "Undo ↩";
+        undoBtn.className = "btn-undo"; 
+        undoBtn.onclick = () => this.#onUndoClick?.();
+
+
         const btn = document.createElement("button");
         btn.textContent = "Play Again";
         btn.className = "btn-restart";
         btn.onclick = () => this.#onRestartClick?.();
 
         this.#winMessage.append(this.#winText, btn);
-        main.append(this.#boardElement, this.#winMessage);
+        main.append(undoBtn, this.#boardElement, this.#winMessage);
         this.#root.append(main);
 
         this.#boardElement.onclick = (e) => {
@@ -41,7 +49,7 @@ export class CheckersView {
             if (cell) this.#onSquareClick?.(parseInt(cell.dataset.row), parseInt(cell.dataset.col));
         };
     }
-
+    bindUndoClick(handler) { this.#onUndoClick = handler; }
     bindSquareClick(handler) { this.#onSquareClick = handler; }
     bindRestartClick(handler) { this.#onRestartClick = handler; }
 
