@@ -1,9 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&display=swap');
 
 :root {
-    --square-size: clamp(40px, 10vw, 80px);
+    --square-size: clamp(30px, calc(min(95vw, 70vh) / 8), 90px);
     --checker-size: calc(var(--square-size) * 0.75);
-    --board-border-size: clamp(6px, 1.5vw, 12px);
+    --board-border-size: clamp(4px, 1.5vmin, 12px);
 
 
     --font-main: 'Montserrat', sans-serif;
@@ -16,7 +16,7 @@
     --fs-win-btn: 1.2rem;
 
     /* Відступи  */
-    --gap-section: clamp(15px, 3vw, 30px);
+    --gap-section: clamp(10px, 2vh, 30px);
     --pad-btn-y: clamp(0.5rem, 2vw, 1rem);
     --pad-btn-x: clamp(1.5rem, 4vw, 3.5rem);
     --pad-win-message: 2rem 4rem;
@@ -79,6 +79,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-direction: column;
     gap: var(--gap-section);
     padding: 20px;
     background-image: url('https://images.unsplash.com/photo-1551269901-5c5e14c25df7?q=80&w=1920&auto=format&fit=crop');
@@ -286,4 +287,16 @@
 .btn-undo:hover {
     background-color: var(--color-accent);
     color: var(--color-text-btn);
+}
+
+
+
+@media (max-width: 600px) {
+    .game-section {
+        padding: 10px; 
+    }
+    
+    .btn-undo {
+        margin-bottom: 10px; 
+    }
 }
