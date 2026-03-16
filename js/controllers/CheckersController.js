@@ -62,7 +62,7 @@ export class CheckersController {
     }
 
     #updateView() {
-        this.#view.renderBoard(this.#model.board, this.#selectedCell, this.#validMoves);
+        this.#view.renderBoard(this.#model.board, this.#selectedCell, this.#validMoves, this.#model.currentTurn);
     }
 
     #handleRestartGame() {
@@ -71,5 +71,6 @@ export class CheckersController {
         this.#validMoves = [];
         this.#view.hideWinner();
         this.#updateView();
+        
     }
 }

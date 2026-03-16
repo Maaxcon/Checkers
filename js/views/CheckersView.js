@@ -9,6 +9,7 @@ export class CheckersView {
     #winMessage; 
     #winText;
     #onUndoClick;
+    #statusTitle;
 
     constructor(root) {
         this.#root = root;
@@ -28,6 +29,9 @@ export class CheckersView {
         this.#winMessage.style.display = "none";
         this.#winText = document.createElement("h3");
 
+        const title = document.createElement("h2");
+        title.classList.add("game-section__title");
+        this.#statusTitle = title;
 
         const undoBtn = document.createElement("button");
         undoBtn.textContent = "Undo ↩";
@@ -41,7 +45,7 @@ export class CheckersView {
         btn.onclick = () => this.#onRestartClick?.();
 
         this.#winMessage.append(this.#winText, btn);
-        main.append(undoBtn, this.#boardElement, this.#winMessage);
+        main.append(this.#statusTitle, undoBtn, this.#boardElement, this.#winMessage);
         this.#root.append(main);
 
         this.#boardElement.onclick = (e) => {
@@ -53,7 +57,9 @@ export class CheckersView {
     bindSquareClick(handler) { this.#onSquareClick = handler; }
     bindRestartClick(handler) { this.#onRestartClick = handler; }
 
-    renderBoard(boardData, selectedCell = null, validMoves = []) {
+    renderBoard(boardData, selectedCell = null, validMoves = [],currentPlayer = 1) {
+        const turnText = currentPlayer === PLAYERS.LIGHT ? "White's Turn" : "Black's Turn";
+        this.#statusTitle.textContent = turnText;
         this.#boardElement.innerHTML = ''; 
 
         this.#boardElement.style.gridTemplateColumns = `repeat(${BOARD.COLS}, var(--square-size))`;
