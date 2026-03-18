@@ -14,26 +14,9 @@ export class GameState {
     }
 
     restore(savedData) {
-        const newGrid = [];
-        for (let row = 0; row < BOARD.ROWS; row++) {
-            let gridRow = [];
-            for (let col = 0; col < BOARD.COLS; col++) {
-                const savedPiece = savedData.grid[row][col];
-                
-                if (savedPiece !== null) {
-                    const alivePiece = new Piece(savedPiece.player);
-                    if (savedPiece.isKing) alivePiece.makeKing();
-                    gridRow.push(alivePiece);
-                } else {
-                    gridRow.push(null);
-                }
-            }
-            newGrid.push(gridRow);
-        }
-
-        this.#board.grid = newGrid;
-        this.#currentTurn = savedData.turn;
-        this.#multiJumpPiece = null; 
+        this.#board.restoreFrom(savedData.grid);
+        this.#currentTurn = savedData.turn; 
+        this.#multiJumpPiece = null;        
         this.#winner = null;
     }
 

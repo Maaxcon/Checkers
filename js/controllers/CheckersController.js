@@ -17,6 +17,7 @@ export class CheckersController {
 
 
     #handleUndo() {
+        if(this.#isAnimating) return;
         this.#model.undo();
         this.#selectedCell = null;
         this.#validMoves = [];
@@ -66,6 +67,7 @@ export class CheckersController {
     }
 
     #handleRestartGame() {
+        if (this.#isAnimating) return;
         this.#model.resetGame();
         this.#selectedCell = null;
         this.#validMoves = [];

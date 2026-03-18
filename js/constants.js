@@ -37,5 +37,6 @@ export const DIRECTIONS = {
 export const GAME_SETTINGS = {
     JUMP_DISTANCE: 2,
     ANIMATION_DURATION_MS: 400,
-    ANIMATION_Z_INDEX: '1000'
+    ANIMATION_Z_INDEX: '1000',
+    STORAGE_KEY: 'checkers_save',
 };

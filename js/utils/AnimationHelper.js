@@ -12,8 +12,9 @@ export class AnimationHelper {
         piece.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
         piece.style.zIndex = GAME_SETTINGS.ANIMATION_Z_INDEX;
 
+        
         piece.addEventListener('transitionend', () => {
             onComplete();
-        });
+        }, {once: true});
     }
 }
