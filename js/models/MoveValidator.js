@@ -24,7 +24,7 @@ export class MoveValidator {
                         return true; 
                     }
                 }
-            }
+            }                   
         }
         return false;
     }
