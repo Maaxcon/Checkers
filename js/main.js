@@ -9,3 +9,4 @@ document.addEventListener("DOMContentLoaded", () => {
     const view = new CheckersView(root);
     const controller = new CheckersController(model, view);
 });
+// Rebase step 2
