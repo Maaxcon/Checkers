@@ -40,3 +40,6 @@ export const GAME_SETTINGS = {
     ANIMATION_Z_INDEX: '1000',
     STORAGE_KEY: 'checkers_save',
 };
+
+// My stash test
+// Rebase step 1
