@@ -21,6 +21,7 @@ export class CheckersController {
         this.#model.undo();
         this.#selectedCell = null;
         this.#validMoves = [];
+        
         this.#updateView();
 }
 
