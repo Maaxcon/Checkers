@@ -1,6 +1,6 @@
 import { PLAYERS, BOARD } from '../constants.js';
 import { Board } from './Board.js';
-import { Piece } from './Piece.js'; 
+
 
 export class GameState {
     #board;

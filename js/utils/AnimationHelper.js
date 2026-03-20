@@ -14,6 +14,9 @@ export class AnimationHelper {
 
         
         piece.addEventListener('transitionend', () => {
+            piece.style.transition = '';
+            piece.style.transform = '';
+            piece.style.zIndex = '';
             onComplete();
         }, {once: true});
     }

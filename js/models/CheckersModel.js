@@ -1,11 +1,12 @@
 import { GameState } from './GameState.js';
 import { MoveValidator } from './MoveValidator.js';
 import { GameStorage } from '../utils/GameStorage.js'; 
-import { PLAYERS } from '../constants.js';  
 
 export class CheckersModel {
     #state;
     #history = [];
+    #selectedCell = null;
+    #validMoves = [];
 
     constructor() {
         this.#state = new GameState(); 
@@ -28,11 +29,15 @@ export class CheckersModel {
     get currentTurn() { return this.#state.currentTurn; }
     get multiJumpPiece() { return this.#state.multiJumpPiece; }
     get winner() { return this.#state.winner; }
+    
+    get selectedCell() { return this.#selectedCell; }
+    get validMoves() { return this.#validMoves; }
 
     undo() {
         if (this.#history.length === 0) return; 
         const lastStateJSON = this.#history.pop();
         this.#state.restore(JSON.parse(lastStateJSON));
+        this.clearSelection(); 
         this.#save();
     }
 
@@ -49,11 +54,30 @@ export class CheckersModel {
     resetGame() {
         this.#state.reset();
         this.#history = []; 
+        this.clearSelection(); 
         GameStorage.clear();
     }
 
     getValidMoves(row, col) {
         return MoveValidator.getValidMoves(this.#state, row, col);
+    }
+
+    selectSquare(row, col) {
+        if (this.#state.multiJumpPiece) return;
+
+        const piece = this.board[row][col];
+        
+        if (piece !== null && piece.player === this.currentTurn) {
+            this.#selectedCell = { row, col };
+            this.#validMoves = this.getValidMoves(row, col);
+        } else {
+            this.clearSelection();
+        }
+    }
+
+    clearSelection() {
+        this.#selectedCell = null;
+        this.#validMoves = [];
     }
 
     movePiece(fromRow, fromCol, toRow, toCol, moveInfo) {
@@ -69,6 +93,10 @@ export class CheckersModel {
         if (moveInfo.type === 'capture' && !result.becameKing) {
             if (MoveValidator.getCapturesForPiece(this.#state, toRow, toCol).length > 0) {
                 this.#state.setMultiJumpPiece(toRow, toCol); 
+                
+                this.#selectedCell = { row: toRow, col: toCol };
+                this.#validMoves = this.getValidMoves(toRow, toCol);
+                
                 this.#save();
                 return false; 
             }
@@ -76,6 +104,7 @@ export class CheckersModel {
 
         this.#state.clearMultiJumpPiece();
         this.#state.switchTurn();
+        this.clearSelection(); 
 
         const winner = MoveValidator.calculateWinner(this.#state);
         if (winner) this.#state.setWinner(winner);

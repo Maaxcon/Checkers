@@ -9,11 +9,8 @@ export const BOARD = {
 };
 
 export const PLAYERS = {
-    EMPTY: 0,
     LIGHT: 1, 
     DARK: 2,
-    LIGHT_KING: 3, 
-    DARK_KING: 4   
 };
 
 export const CSS = {
@@ -41,5 +38,3 @@ export const GAME_SETTINGS = {
     STORAGE_KEY: 'checkers_save',
 };
 
-// My stash test
-// Rebase step 1
