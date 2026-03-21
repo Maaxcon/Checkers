@@ -36,5 +36,6 @@ export const GAME_SETTINGS = {
     ANIMATION_DURATION_MS: 400,
     ANIMATION_Z_INDEX: '1000',
     STORAGE_KEY: 'checkers_save',
+    INITIAL_TIME_SECONDS: 300,
 };
 

@@ -1,12 +1,22 @@
+import { GameTimer } from '../models/GameTimer.js';
+
 export class CheckersController {
     #model; 
     #view; 
     #isAnimating;
+    #timer; 
 
     constructor(model, view) {
         this.#model = model;
         this.#view = view;
         this.#isAnimating = false;
+
+        this.#timer = new GameTimer(
+            (times) => this.#view.timerView.render(times, this.#model.currentTurn),
+            (winner) => {
+                this.#view.showWinner(winner); 
+            }
+        );
 
         this.#view.bindSquareClick((row, col) => this.#handleInteraction(row, col));
         this.#view.bindDrop((row, col) => this.#handleInteraction(row, col)); 
@@ -17,6 +27,10 @@ export class CheckersController {
         this.#view.historyView.bindClick((from, to) => this.#handleHistoryClick(from, to));
         
         this.#updateView();
+
+        if (!this.#model.winner) {
+            this.#timer.start(this.#model.currentTurn);
+        }
     }
 
     #handleHistoryClick(from, to) {
@@ -29,6 +43,12 @@ export class CheckersController {
         if(this.#isAnimating) return;
         this.#model.undo();
         this.#updateView();
+        
+        if (!this.#model.winner) {
+            this.#view.hideWinner();
+            this.#timer.start(this.#model.currentTurn);
+            this.#timer.switchTurn(this.#model.currentTurn);
+        }
     }
 
     #handleDragStart(row, col) {
@@ -56,7 +76,13 @@ export class CheckersController {
                 
                 this.#updateView();
                 this.#isAnimating = false;
-                if (this.#model.winner) this.#view.showWinner(this.#model.winner);
+                
+                if (this.#model.winner) {
+                    this.#view.showWinner(this.#model.winner);
+                    this.#timer.stop(); 
+                } else {
+                    this.#timer.switchTurn(this.#model.currentTurn);
+                }
             });
             return;
         }
@@ -82,5 +108,8 @@ export class CheckersController {
         this.#model.resetGame();
         this.#view.hideWinner();
         this.#updateView();
+
+        this.#timer.reset();
+        this.#timer.start(this.#model.currentTurn);
     }
 }

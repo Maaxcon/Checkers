@@ -10,7 +10,7 @@ export class NotationHelper {
     static formatMove(fromRow, fromCol, toRow, toCol, isCapture) {
         const fromNotation = this.toNotation(fromRow, fromCol);
         const toNotation = this.toNotation(toRow, toCol);
-        const separator = isCapture ? 'x' : '-';
+        const separator = isCapture ? ' x ' : '-';
         
         return `${fromNotation}${separator}${toNotation}`;
     }

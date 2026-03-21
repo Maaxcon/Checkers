@@ -1,30 +1,37 @@
 import { BOARD, PLAYERS, CSS } from '../constants.js';
 import { AnimationHelper } from '../utils/AnimationHelper.js';
 import { HistoryView } from './HistoryView.js';
+import { TimerView } from './TimerView.js';
 
 export class CheckersView {
     #root; 
     #boardElement; 
-    #statusTitle;
     #winMessage; 
     #winText;
     
     #historyView; 
+    #timerView; 
 
     #onSquareClick; 
     #onRestartClick; 
     #onUndoClick;
     #onDragStart; 
     #onDrop;      
+    #keyboardCursor = null;
 
     constructor(root) {
         this.#root = root;
         this.#createLayout();
         this.#initDragAndDrop();
+        this.#initKeyboardNavigation();
     }
 
     get historyView() {
         return this.#historyView;
+    }
+
+    get timerView() {
+        return this.#timerView;
     }
 
     #createLayout() {
@@ -34,8 +41,7 @@ export class CheckersView {
         gameContainer.className = "game-container"; 
 
         const main = document.createElement("main");
-        main.className = "game-section";
-        
+        main.className = "game-section"; 
         
         this.#boardElement = document.createElement("div");
         this.#boardElement.className = CSS.BOARD;
@@ -60,9 +66,7 @@ export class CheckersView {
         this.#winText = document.createElement("h3");
         this.#winText.className = "win-title";
 
-        this.#statusTitle = document.createElement("h2");
-        this.#statusTitle.classList.add("game-section__title");
-
+      
         const undoBtn = document.createElement("button");
         undoBtn.textContent = "Undo ↩";
         undoBtn.className = "btn-undo"; 
@@ -74,7 +78,9 @@ export class CheckersView {
         btn.onclick = () => this.#onRestartClick?.();
 
         this.#winMessage.append(this.#winText, btn);
-        main.append(this.#statusTitle, undoBtn, this.#boardElement, this.#winMessage);
+        main.append(undoBtn, this.#boardElement, this.#winMessage);
+
+        this.#timerView = new TimerView(main);
 
         gameContainer.append(main);
         
@@ -83,6 +89,8 @@ export class CheckersView {
         this.#root.append(gameContainer);
 
         this.#boardElement.onclick = (e) => {
+            this.#keyboardCursor = null; 
+            this.#updateKeyboardVisuals();
             const cell = e.target.closest(`.${CSS.CELL}`);
             if (cell) this.#onSquareClick?.(parseInt(cell.dataset.row), parseInt(cell.dataset.col));
         };
@@ -130,6 +138,53 @@ export class CheckersView {
         });
     }
 
+
+    #initKeyboardNavigation() {
+        document.addEventListener('keydown', (e) => {
+            const validKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', ' '];
+            
+            if (!validKeys.includes(e.key)) return;
+            
+
+            e.preventDefault();
+
+            if (!this.#keyboardCursor) {
+                this.#keyboardCursor = { row: 3, col: 3 };
+            } else {
+                switch (e.key) {
+                    case 'ArrowUp':
+                        this.#keyboardCursor.row = Math.max(0, this.#keyboardCursor.row - 1);
+                        break;
+                    case 'ArrowDown':
+                        this.#keyboardCursor.row = Math.min(BOARD.ROWS - 1, this.#keyboardCursor.row + 1);
+                        break;
+                    case 'ArrowLeft':
+                        this.#keyboardCursor.col = Math.max(0, this.#keyboardCursor.col - 1);
+                        break;
+                    case 'ArrowRight':
+                        this.#keyboardCursor.col = Math.min(BOARD.COLS - 1, this.#keyboardCursor.col + 1);
+                        break;
+                    case 'Enter':
+                    case ' ':
+                        this.#onSquareClick?.(this.#keyboardCursor.row, this.#keyboardCursor.col);
+                        break;
+                }
+            }
+            this.#updateKeyboardVisuals();
+        });
+    }
+
+    #updateKeyboardVisuals() {
+        const oldFocused = this.#boardElement.querySelector('.is-keyboard-focused');
+        if (oldFocused) oldFocused.classList.remove('is-keyboard-focused');
+
+        if (this.#keyboardCursor) {
+            const index = this.#keyboardCursor.row * BOARD.COLS + this.#keyboardCursor.col;
+            const cell = this.#boardElement.children[index];
+            if (cell) cell.classList.add('is-keyboard-focused');
+        }
+    }
+
     bindUndoClick(handler) { this.#onUndoClick = handler; }
     bindSquareClick(handler) { this.#onSquareClick = handler; }
     bindRestartClick(handler) { this.#onRestartClick = handler; }
@@ -137,7 +192,6 @@ export class CheckersView {
     bindDrop(handler) { this.#onDrop = handler; }
 
     renderBoard(boardData, selectedCell = null, validMoves = [], currentPlayer = PLAYERS.LIGHT, historyHighlight = null) {
-        this.#statusTitle.textContent = currentPlayer === PLAYERS.LIGHT ? "White's Turn" : "Black's Turn";
 
         for (let row = 0; row < BOARD.ROWS; row++) {
             for (let col = 0; col < BOARD.COLS; col++) {
@@ -192,7 +246,7 @@ export class CheckersView {
     }
 
     showWinner(id) {
-        this.#winText.textContent = `${id === PLAYERS.LIGHT ? "White" : "Black"} Wins!`;
+        this.#winText.textContent = id === "TIMEOUT" ? "Time's up!" : `${id === PLAYERS.LIGHT ? "White" : "Black"} Wins!`;
         this.#winMessage.style.display = "flex";
         this.#boardElement.style.pointerEvents = "none";
     }
