@@ -84,11 +84,11 @@ export class GameState {
 
         let becameKing = false;
         
-        if (piece.isKing === false) {
+        if (!piece.isKing) {
             if (piece.isLight === true && toRow === BOARD.TOP_ROW) { 
                 piece.makeKing(); 
                 becameKing = true; 
-            } else if (piece.isLight === false && toRow === BOARD.BOTTOM_ROW) { 
+            } else if (!piece.isLight && toRow === BOARD.BOTTOM_ROW) { 
                 piece.makeKing(); 
                 becameKing = true; 
             }

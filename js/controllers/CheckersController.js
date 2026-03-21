@@ -8,9 +8,20 @@ export class CheckersController {
         this.#view = view;
         this.#isAnimating = false;
 
-        this.#view.bindSquareClick((row, col) => this.#handleSquareClick(row, col));
+        this.#view.bindSquareClick((row, col) => this.#handleInteraction(row, col));
+        this.#view.bindDrop((row, col) => this.#handleInteraction(row, col)); 
+        this.#view.bindDragStart((row, col) => this.#handleDragStart(row, col)); 
         this.#view.bindRestartClick(() => this.#handleRestartGame());
         this.#view.bindUndoClick(() => this.#handleUndo());
+        
+        this.#view.historyView.bindClick((from, to) => this.#handleHistoryClick(from, to));
+        
+        this.#updateView();
+    }
+
+    #handleHistoryClick(from, to) {
+        if (this.#isAnimating) return;
+        this.#model.setHistoryHighlight(from, to);
         this.#updateView();
     }
 
@@ -20,8 +31,18 @@ export class CheckersController {
         this.#updateView();
     }
 
-    #handleSquareClick(row, col) {
+    #handleDragStart(row, col) {
         if (this.#isAnimating || this.#model.winner) return;
+        
+        this.#model.clearHistoryHighlight(); 
+        this.#model.selectSquare(row, col);
+        this.#updateView();
+    }
+
+    #handleInteraction(row, col) {
+        if (this.#isAnimating || this.#model.winner) return;
+        
+        this.#model.clearHistoryHighlight(); 
 
         const currentSelection = this.#model.selectedCell;
         const moveTarget = this.#model.validMoves.find(m => m.row === row && m.col === col);
@@ -49,8 +70,11 @@ export class CheckersController {
             this.#model.board, 
             this.#model.selectedCell, 
             this.#model.validMoves, 
-            this.#model.currentTurn
+            this.#model.currentTurn,
+            this.#model.historyHighlight
         );
+        
+        this.#view.historyView.render(this.#model.moveLog);
     }
 
     #handleRestartGame() {

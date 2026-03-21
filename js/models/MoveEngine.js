@@ -7,7 +7,7 @@ export class MoveEngine {
         
         if (piece === null) return []; 
         
-        if (piece.isKing === true) {
+        if (piece.isKing) {
             return this.getKingMoves(board, row, col, piece);
         } else {
             return this.getNormalPieceMoves(board, row, col, piece);
@@ -56,7 +56,7 @@ export class MoveEngine {
                 const targetPiece = board.getPiece(jumpRow, jumpCol);
                 
                 if (targetPiece === null) {
-                    if (piece.isOpponent(middlePiece) === true) {
+                    if (piece.isOpponent(middlePiece)) {
                         moves.push({ 
                             row: jumpRow, 
                             col: jumpCol, 
@@ -93,7 +93,7 @@ export class MoveEngine {
                 if (foundEnemy === null) {
                     if (targetPiece === null) {
                         moves.push({ row: currentRow, col: currentCol, type: 'move' });
-                    } else if (piece.isOpponent(targetPiece) === true) {
+                    } else if (piece.isOpponent(targetPiece)) {
                         foundEnemy = { row: currentRow, col: currentCol };
                     } else {
                         break; 

@@ -1,12 +1,16 @@
 import { GameState } from './GameState.js';
 import { MoveValidator } from './MoveValidator.js';
 import { StorageService } from '../services/StorageService.js';
+import { NotationHelper } from '../utils/NotationHelper.js'; 
 
 export class CheckersModel {
     #state;
     #history = [];
     #selectedCell = null;
     #validMoves = [];
+    
+    #moveLog = []; 
+    #historyHighlight = null; 
 
     constructor() {
         this.#state = new GameState(); 
@@ -16,17 +20,28 @@ export class CheckersModel {
     #init() {
         const savedData = StorageService.load();
         if (savedData) {
-            this.#state.restore(savedData); 
-            if (savedData.history) {
-                this.#history = savedData.history.map(stateData => {
-                    const state = new GameState();
-                    state.restore(stateData);
-                    return state;
-                });
-            }
-            if (savedData.winner) this.#state.setWinner(savedData.winner);
-            if (savedData.multiJumpPiece) {
-                this.#state.setMultiJumpPiece(savedData.multiJumpPiece.row, savedData.multiJumpPiece.col);
+            try {
+                this.#state.restore(savedData); 
+                
+                if (savedData.history) {
+                    this.#history = savedData.history.map(stateData => {
+                        const parsedData = typeof stateData === 'string' ? JSON.parse(stateData) : stateData;
+                        const state = new GameState();
+                        state.restore(parsedData);
+                        return state;
+                    });
+                }
+                
+                if (savedData.moveLog) {
+                    this.#moveLog = savedData.moveLog;
+                }
+
+                if (savedData.winner) this.#state.setWinner(savedData.winner);
+                if (savedData.multiJumpPiece) {
+                    this.#state.setMultiJumpPiece(savedData.multiJumpPiece.row, savedData.multiJumpPiece.col);
+                }
+            } catch (error) {
+                this.resetGame();
             }
         }
     }
@@ -38,13 +53,17 @@ export class CheckersModel {
     
     get selectedCell() { return this.#selectedCell; }
     get validMoves() { return this.#validMoves; }
+    get moveLog() { return this.#moveLog; }
+    get historyHighlight() { return this.#historyHighlight; }
 
     undo() {
         if (this.#history.length === 0) return; 
         
         this.#state = this.#history.pop();
+        this.#moveLog.pop(); 
         
         this.clearSelection(); 
+        this.clearHistoryHighlight();
         this.#save();
     }
 
@@ -54,15 +73,18 @@ export class CheckersModel {
             turn: this.#state.currentTurn,
             history: this.#history.map(state => state.toJSON()),
             winner: this.#state.winner,
-            multiJumpPiece: this.#state.multiJumpPiece
+            multiJumpPiece: this.#state.multiJumpPiece,
+            moveLog: this.#moveLog
         });
     }
 
     resetGame() {
         this.#state.reset();
         this.#history = []; 
+        this.#moveLog = [];
         this.clearSelection(); 
-        StorageService.clear()
+        this.clearHistoryHighlight();
+        StorageService.clear();
     }
 
     getValidMoves(row, col) {
@@ -87,14 +109,40 @@ export class CheckersModel {
         this.#validMoves = [];
     }
 
+    setHistoryHighlight(from, to) {
+        this.#historyHighlight = { from, to };
+        this.clearSelection(); 
+    }
+
+    clearHistoryHighlight() {
+        this.#historyHighlight = null;
+    }
+
+
     movePiece(fromRow, fromCol, toRow, toCol, moveInfo) {
+        const isCapture = moveInfo.type === 'capture';
+
         if (!this.#state.multiJumpPiece) {
             this.#history.push(this.#state.clone());
+            
+            const moveString = NotationHelper.formatMove(fromRow, fromCol, toRow, toCol, isCapture);
+            
+            this.#moveLog.push({ 
+                notation: moveString, 
+                from: {row: fromRow, col: fromCol}, 
+                to: {row: toRow, col: toCol} 
+            });
+        } else {
+            const lastMove = this.#moveLog[this.#moveLog.length - 1];
+            const toNotation = NotationHelper.toNotation(toRow, toCol);
+            
+            lastMove.notation += `x${toNotation}`;
+            lastMove.to = {row: toRow, col: toCol};
         }
 
         const result = this.#state.executeMove(fromRow, fromCol, toRow, toCol, moveInfo);
 
-        if (moveInfo.type === 'capture' && !result.becameKing) {
+        if (isCapture && !result.becameKing) {
             if (MoveValidator.getCapturesForPiece(this.#state, toRow, toCol).length > 0) {
                 this.#state.setMultiJumpPiece(toRow, toCol); 
                 

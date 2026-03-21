@@ -2,11 +2,7 @@ import { GAME_SETTINGS } from '../constants.js';
 
 export class StorageService {
     static save(data) {
-        try {
             localStorage.setItem(GAME_SETTINGS.STORAGE_KEY, JSON.stringify(data));
-        } catch (e) {
-            console.error("Save error:", e);
-        }
     }
 
     static load() {
@@ -15,7 +11,6 @@ export class StorageService {
         try {
             return JSON.parse(json);
         } catch (e) {
-            console.error("Load error:", e);
             this.clear();
             return null;
         }

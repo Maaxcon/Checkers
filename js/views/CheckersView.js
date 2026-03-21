@@ -1,5 +1,6 @@
 import { BOARD, PLAYERS, CSS } from '../constants.js';
 import { AnimationHelper } from '../utils/AnimationHelper.js';
+import { HistoryView } from './HistoryView.js';
 
 export class CheckersView {
     #root; 
@@ -7,9 +8,14 @@ export class CheckersView {
     #statusTitle;
     #winMessage; 
     #winText;
+    
+    #historyView; 
+
     #onSquareClick; 
     #onRestartClick; 
     #onUndoClick;
+    #onDragStart; 
+    #onDrop;      
 
     constructor(root) {
         this.#root = root;
@@ -17,18 +23,42 @@ export class CheckersView {
         this.#initDragAndDrop();
     }
 
+    get historyView() {
+        return this.#historyView;
+    }
+
     #createLayout() {
         this.#root.innerHTML = '';
+        
+        const gameContainer = document.createElement("div");
+        gameContainer.className = "game-container"; 
+
         const main = document.createElement("main");
         main.className = "game-section";
         
+        
         this.#boardElement = document.createElement("div");
         this.#boardElement.className = CSS.BOARD;
+        
+        this.#boardElement.style.gridTemplateColumns = `repeat(${BOARD.COLS}, var(--square-size))`;
+        this.#boardElement.style.gridTemplateRows = `repeat(${BOARD.ROWS}, var(--square-size))`;
+
+        for (let row = 0; row < BOARD.ROWS; row++) {
+            for (let col = 0; col < BOARD.COLS; col++) {
+                const cell = document.createElement('div');
+                cell.classList.add(CSS.CELL);
+                cell.classList.add((row + col) % 2 === 0 ? CSS.CELL_WHITE : CSS.CELL_BLACK);
+                cell.dataset.row = row;
+                cell.dataset.col = col;
+                this.#boardElement.append(cell);
+            }
+        }
 
         this.#winMessage = document.createElement("div");
         this.#winMessage.className = "win-message";
         this.#winMessage.style.display = "none";
         this.#winText = document.createElement("h3");
+        this.#winText.className = "win-title";
 
         this.#statusTitle = document.createElement("h2");
         this.#statusTitle.classList.add("game-section__title");
@@ -45,7 +75,12 @@ export class CheckersView {
 
         this.#winMessage.append(this.#winText, btn);
         main.append(this.#statusTitle, undoBtn, this.#boardElement, this.#winMessage);
-        this.#root.append(main);
+
+        gameContainer.append(main);
+        
+        this.#historyView = new HistoryView(gameContainer);
+
+        this.#root.append(gameContainer);
 
         this.#boardElement.onclick = (e) => {
             const cell = e.target.closest(`.${CSS.CELL}`);
@@ -54,30 +89,28 @@ export class CheckersView {
     }
 
     #initDragAndDrop() {
-        this.#boardElement.addEventListener('dragstart', (e) => {// коли починається перетягування один раз спрацювоує
+        this.#boardElement.addEventListener('dragstart', (e) => {
             const checker = e.target.closest(`.${CSS.CHECKER}`);
             if (!checker) { e.preventDefault(); return; }
 
             const cell = checker.closest(`.${CSS.CELL}`);
-            const row = cell.dataset.row;
-            const col = cell.dataset.col;
+            const row = parseInt(cell.dataset.row);
+            const col = parseInt(cell.dataset.col);
 
             e.dataTransfer.setData('application/json', JSON.stringify({ row, col }));
             e.dataTransfer.effectAllowed = 'move';
 
             setTimeout(() => checker.style.opacity = '0.5', 0);
             
-            setTimeout(() => {
-                this.#onSquareClick?.(parseInt(row), parseInt(col));
-            }, 0);
+            this.#onDragStart?.(row, col);
         });
 
-        this.#boardElement.addEventListener('dragend', (e) => { // коли закінчується перетягування, на тому елементі, який перетягували
+        this.#boardElement.addEventListener('dragend', (e) => { 
             const checker = e.target.closest(`.${CSS.CHECKER}`);
             if (checker) checker.style.opacity = '1';
         });
 
-        this.#boardElement.addEventListener('dragover', (e) => { // постійно спрацьовує, коли перетягуємо елемент
+        this.#boardElement.addEventListener('dragover', (e) => { 
             const cell = e.target.closest(`.${CSS.CELL}`);
             if (cell && cell.classList.contains(CSS.HIGHLIGHT)) {
                 e.preventDefault(); 
@@ -85,7 +118,7 @@ export class CheckersView {
             }
         });
 
-        this.#boardElement.addEventListener('drop', (e) => { //     коли відпускаємо перетягуваний елемент
+        this.#boardElement.addEventListener('drop', (e) => { 
             e.preventDefault(); 
             const cell = e.target.closest(`.${CSS.CELL}`);
             if (!cell || !cell.classList.contains(CSS.HIGHLIGHT)) return;
@@ -93,56 +126,56 @@ export class CheckersView {
             const targetRow = parseInt(cell.dataset.row);
             const targetCol = parseInt(cell.dataset.col);
 
-            this.#onSquareClick?.(targetRow, targetCol);
+            this.#onDrop?.(targetRow, targetCol);
         });
     }
 
     bindUndoClick(handler) { this.#onUndoClick = handler; }
     bindSquareClick(handler) { this.#onSquareClick = handler; }
     bindRestartClick(handler) { this.#onRestartClick = handler; }
+    bindDragStart(handler) { this.#onDragStart = handler; }
+    bindDrop(handler) { this.#onDrop = handler; }
 
-    renderBoard(boardData, selectedCell = null, validMoves = [], currentPlayer = PLAYERS.LIGHT) {
+    renderBoard(boardData, selectedCell = null, validMoves = [], currentPlayer = PLAYERS.LIGHT, historyHighlight = null) {
         this.#statusTitle.textContent = currentPlayer === PLAYERS.LIGHT ? "White's Turn" : "Black's Turn";
-        this.#boardElement.innerHTML = ''; 
-
-        this.#boardElement.style.gridTemplateColumns = `repeat(${BOARD.COLS}, var(--square-size))`;
-        this.#boardElement.style.gridTemplateRows = `repeat(${BOARD.ROWS}, var(--square-size))`;
 
         for (let row = 0; row < BOARD.ROWS; row++) {
             for (let col = 0; col < BOARD.COLS; col++) {
-                const pieceObj = boardData[row][col];
+                const cellIndex = row * BOARD.COLS + col;
+                const cell = this.#boardElement.children[cellIndex]; 
+
                 const isHighlighted = validMoves.some(move => move.row === row && move.col === col);
                 const isSelected = selectedCell !== null && selectedCell.row === row && selectedCell.col === col;
+                
+                const isHistoryPoint = historyHighlight && (
+                    (row === historyHighlight.from.row && col === historyHighlight.from.col) ||
+                    (row === historyHighlight.to.row && col === historyHighlight.to.col)
+                );
+                
+                cell.classList.toggle(CSS.HIGHLIGHT, isHighlighted);
+                cell.classList.toggle(CSS.SELECTED, isSelected);
+                cell.classList.toggle('is-history-highlight', !!isHistoryPoint);
 
-                const cellElement = this.#createCellElement(row, col, pieceObj, isHighlighted, isSelected);
-                this.#boardElement.append(cellElement);
+                const pieceObj = boardData[row][col];
+                let checker = cell.querySelector(`.${CSS.CHECKER}`);
+
+                if (pieceObj !== null) {
+                    if (!checker) {
+                        checker = document.createElement('div');
+                        checker.setAttribute('draggable', 'true');
+                        cell.appendChild(checker);
+                    }
+                    
+                    checker.className = `${CSS.CHECKER} ${pieceObj.player === PLAYERS.LIGHT ? CSS.CHECKER_LIGHT : CSS.CHECKER_DARK}`;
+                    if (pieceObj.isKing) checker.classList.add(CSS.CHECKER_KING);
+                    
+                } else {
+                    if (checker) {
+                        checker.remove();
+                    }
+                }
             }
         }
-    }
-
-    #createCellElement(row, col, pieceObj, isHighlighted, isSelected) {
-        const cell = document.createElement('div');
-        cell.classList.add(CSS.CELL);
-        cell.classList.add((row + col) % 2 === 0 ? CSS.CELL_WHITE : CSS.CELL_BLACK);
-        
-        cell.dataset.row = row;
-        cell.dataset.col = col;
-
-        if (pieceObj !== null) {
-            const checker = document.createElement('div');
-            checker.classList.add(CSS.CHECKER);
-            checker.setAttribute('draggable', 'true');
-
-            checker.classList.add(pieceObj.player === PLAYERS.LIGHT ? CSS.CHECKER_LIGHT : CSS.CHECKER_DARK);
-            if (pieceObj.isKing) checker.classList.add(CSS.CHECKER_KING);
-
-            cell.appendChild(checker);
-        }
-
-        if (isHighlighted) cell.classList.add(CSS.HIGHLIGHT);
-        if (isSelected) cell.classList.add(CSS.SELECTED);
-
-        return cell;
     }
 
     animateMove(fromRow, fromCol, toRow, toCol, onAnimationComplete) {
@@ -153,8 +186,8 @@ export class CheckersView {
     }
 
     hideSelectionAndHighlights() {
-        this.#boardElement.querySelectorAll('.is-selected, .is-highlighted').forEach(el => {
-            el.classList.remove('is-selected', 'is-highlighted');
+        this.#boardElement.querySelectorAll(`.${CSS.SELECTED}, .${CSS.HIGHLIGHT}`).forEach(el => {
+            el.classList.remove(CSS.SELECTED, CSS.HIGHLIGHT);
         });
     }
 
@@ -169,6 +202,3 @@ export class CheckersView {
         this.#boardElement.style.pointerEvents = "auto";
     }
 }
-
-
-
