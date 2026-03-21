@@ -1,6 +1,6 @@
 import { GameState } from './GameState.js';
 import { MoveValidator } from './MoveValidator.js';
-import { GameStorage } from '../utils/GameStorage.js'; 
+import { StorageService } from '../services/StorageService.js';
 
 export class CheckersModel {
     #state;
@@ -14,7 +14,7 @@ export class CheckersModel {
     }
 
     #init() {
-        const savedData = GameStorage.load();
+        const savedData = StorageService.load();
         if (savedData) {
             this.#state.restore(savedData); 
             if (savedData.history) {
@@ -49,7 +49,7 @@ export class CheckersModel {
     }
 
     #save() {
-        GameStorage.save({
+        StorageService.save({
             grid: this.#state.boardMatrix,
             turn: this.#state.currentTurn,
             history: this.#history.map(state => state.toJSON()),
@@ -62,7 +62,7 @@ export class CheckersModel {
         this.#state.reset();
         this.#history = []; 
         this.clearSelection(); 
-        GameStorage.clear();
+        StorageService.clear()
     }
 
     getValidMoves(row, col) {
