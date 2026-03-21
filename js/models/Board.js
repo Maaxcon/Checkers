@@ -34,6 +34,20 @@ export class Board {
         }
     }
 
+    setGrid(newGrid) { 
+        this.#grid = newGrid; 
+    }
+
+
+    clone() {
+        const newBoard = new Board();
+        const clonedGrid = this.#grid.map(row => 
+            row.map(piece => piece ? piece.clone() : null)
+        );
+        newBoard.setGrid(clonedGrid);
+        return newBoard;
+    }
+
     getPiece(row, col) { return this.#grid[row][col]; }
     setPiece(row, col, piece) { this.#grid[row][col] = piece; }
     remove(row, col) { this.#grid[row][col] = null; }
@@ -47,7 +61,6 @@ export class Board {
     isValidPosition(row, col) {
         return row >= 0 && row < BOARD.ROWS && col >= 0 && col < BOARD.COLS;
     }
-
 
     restoreFrom(savedGrid) {
         const newGrid = [];

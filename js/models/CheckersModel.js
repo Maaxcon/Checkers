@@ -17,7 +17,13 @@ export class CheckersModel {
         const savedData = GameStorage.load();
         if (savedData) {
             this.#state.restore(savedData); 
-            this.#history = savedData.history || [];
+            if (savedData.history) {
+                this.#history = savedData.history.map(stateData => {
+                    const state = new GameState();
+                    state.restore(stateData);
+                    return state;
+                });
+            }
             if (savedData.winner) this.#state.setWinner(savedData.winner);
             if (savedData.multiJumpPiece) {
                 this.#state.setMultiJumpPiece(savedData.multiJumpPiece.row, savedData.multiJumpPiece.col);
@@ -35,8 +41,9 @@ export class CheckersModel {
 
     undo() {
         if (this.#history.length === 0) return; 
-        const lastStateJSON = this.#history.pop();
-        this.#state.restore(JSON.parse(lastStateJSON));
+        
+        this.#state = this.#history.pop();
+        
         this.clearSelection(); 
         this.#save();
     }
@@ -45,7 +52,7 @@ export class CheckersModel {
         GameStorage.save({
             grid: this.#state.boardMatrix,
             turn: this.#state.currentTurn,
-            history: this.#history,
+            history: this.#history.map(state => state.toJSON()),
             winner: this.#state.winner,
             multiJumpPiece: this.#state.multiJumpPiece
         });
@@ -82,10 +89,7 @@ export class CheckersModel {
 
     movePiece(fromRow, fromCol, toRow, toCol, moveInfo) {
         if (!this.#state.multiJumpPiece) {
-            this.#history.push(JSON.stringify({
-                grid: this.#state.boardMatrix,
-                turn: this.#state.currentTurn
-            }));
+            this.#history.push(this.#state.clone());
         }
 
         const result = this.#state.executeMove(fromRow, fromCol, toRow, toCol, moveInfo);

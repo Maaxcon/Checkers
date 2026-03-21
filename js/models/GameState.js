@@ -1,7 +1,6 @@
 import { PLAYERS, BOARD } from '../constants.js';
 import { Board } from './Board.js';
 
-
 export class GameState {
     #board;
     #currentTurn;
@@ -13,11 +12,38 @@ export class GameState {
         this.reset();
     }
 
+    clone() {
+        const clonedState = new GameState();
+        clonedState.restoreFromClone(
+            this.#board.clone(),
+            this.#currentTurn,
+            this.#multiJumpPiece,
+            this.#winner
+        );
+        return clonedState;
+    }
+
+    restoreFromClone(clonedBoard, turn, multiJumpPiece, winner) {
+        this.#board = clonedBoard;
+        this.#currentTurn = turn;
+        this.#multiJumpPiece = multiJumpPiece ? { ...multiJumpPiece } : null;
+        this.#winner = winner;
+    }
+
+    toJSON() {
+        return {
+            grid: this.#board.grid,
+            turn: this.#currentTurn,
+            multiJumpPiece: this.#multiJumpPiece,
+            winner: this.#winner
+        };
+    }
+
     restore(savedData) {
         this.#board.restoreFrom(savedData.grid);
         this.#currentTurn = savedData.turn; 
-        this.#multiJumpPiece = null;        
-        this.#winner = null;
+        this.#multiJumpPiece = savedData.multiJumpPiece || null;        
+        this.#winner = savedData.winner || null;
     }
 
     reset() {

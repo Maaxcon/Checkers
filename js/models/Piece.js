@@ -1,8 +1,9 @@
 import { PLAYERS, DIRECTIONS } from '../constants.js';
 
 export class Piece {
-    #player
-    #isKing
+    #player;
+    #isKing;
+    
     constructor(playerType) {
         this.#player = playerType; 
         this.#isKing = false;      
@@ -34,6 +35,12 @@ export class Piece {
 
     makeKing() {
         this.#isKing = true;
+    }
+    
+    clone() {
+        const newPiece = new Piece(this.#player);
+        if (this.#isKing) newPiece.makeKing();
+        return newPiece;
     }
 
     toJSON() {
