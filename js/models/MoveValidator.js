@@ -13,23 +13,35 @@ export class MoveValidator {
         return allMoves.filter(move => move.type === 'capture');
     }
 
-    static playerHasAnyCaptures(gameState) {
+    static getPlayerMoveStatus(gameState) {
+        let hasRegularMoves = false;
+
         for (let row = 0; row < BOARD.ROWS; row++) {
             for (let col = 0; col < BOARD.COLS; col++) {
                 const piece = gameState.board.getPiece(row, col);
-
+                
                 if (this.isCurrentPlayerPiece(gameState, piece)) {
-                    const captures = this.getCapturesForPiece(gameState, row, col);
-                    if (captures.length > 0) {
-                        return true; 
+                    const moves = MoveEngine.getMovesForPiece(gameState.board, row, col);
+                    
+                    if (moves.some(m => m.type === 'capture')) {
+                        return { hasCaptures: true, hasMoves: true };
+                    }
+
+                    if (moves.length > 0) {
+                        hasRegularMoves = true;
                     }
                 }
-            }                   
+            }
         }
-        return false;
+
+        return { hasCaptures: false, hasMoves: hasRegularMoves };
     }
 
-    static getValidMoves(gameState, row, col) {
+    static playerHasAnyCaptures(gameState) {
+        return this.getPlayerMoveStatus(gameState).hasCaptures;
+    }
+
+    static getValidMoves(gameState, row, col, hasGlobalCaptures = null) {
         if (gameState.winner) return []; 
         const piece = gameState.board.getPiece(row, col);
         if (!this.isCurrentPlayerPiece(gameState, piece)) return []; 
@@ -43,8 +55,11 @@ export class MoveValidator {
         }
       
         const allMoves = MoveEngine.getMovesForPiece(gameState.board, row, col);
-      
-        if (this.playerHasAnyCaptures(gameState)) {
+        const mustCapture = hasGlobalCaptures !== null 
+            ? hasGlobalCaptures 
+            : this.playerHasAnyCaptures(gameState);
+
+        if (mustCapture) {
             return allMoves.filter(move => move.type === 'capture');
         }
 
@@ -52,19 +67,12 @@ export class MoveValidator {
     }
 
     static calculateWinner(gameState) {
-        for (let row = 0; row < BOARD.ROWS; row++) {
-            for (let col = 0; col < BOARD.COLS; col++) {
-                const piece = gameState.board.getPiece(row, col);
+        const status = this.getPlayerMoveStatus(gameState);
 
-                if (this.isCurrentPlayerPiece(gameState, piece)) {
-                    const validMoves = this.getValidMoves(gameState, row, col);
-                    if (validMoves.length > 0) {
-                        return null; 
-                    }
-                }
-            }
+        if (!status.hasMoves) {
+            return gameState.currentTurn === PLAYERS.LIGHT ? PLAYERS.DARK : PLAYERS.LIGHT;
         }
 
-        return gameState.currentTurn === PLAYERS.LIGHT ? PLAYERS.DARK : PLAYERS.LIGHT;
+        return null; 
     }
 }

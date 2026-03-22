@@ -49,7 +49,6 @@ export class Board {
     }
 
     getPiece(row, col) { return this.#grid[row][col]; }
-    setPiece(row, col, piece) { this.#grid[row][col] = piece; }
     remove(row, col) { this.#grid[row][col] = null; }
 
     move(fromRow, fromCol, toRow, toCol) {

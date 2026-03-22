@@ -1,129 +1,132 @@
 import { GameState } from './GameState.js';
 import { MoveValidator } from './MoveValidator.js';
-import { StorageService } from '../services/StorageService.js';
 import { NotationHelper } from '../utils/NotationHelper.js'; 
+import { GameTimer } from './GameTimer.js'; 
 
 export class CheckersModel {
     #state;
     #history = [];
-    #selectedCell = null;
-    #validMoves = [];
-    
     #moveLog = []; 
-    #historyHighlight = null; 
+    #timer; 
+    #onGameOverCallback = null; 
 
     constructor() {
         this.#state = new GameState(); 
-        this.#init();
+        this.#timer = new GameTimer();
+        
+        this.#timer.bindTimeOut((winner) => {
+            this.#notifyGameOver(winner);
+        });
     }
 
-    #init() {
-        const savedData = StorageService.load();
-        if (savedData) {
-            try {
-                this.#state.restore(savedData); 
-                
-                if (savedData.history) {
-                    this.#history = savedData.history.map(stateData => {
-                        const parsedData = typeof stateData === 'string' ? JSON.parse(stateData) : stateData;
-                        const state = new GameState();
-                        state.restore(parsedData);
-                        return state;
-                    });
-                }
-                
-                if (savedData.moveLog) {
-                    this.#moveLog = savedData.moveLog;
-                }
+    #notifyGameOver(winner) {
+        this.#state.setWinner(winner);
+        this.#timer.stop();
+        this.#onGameOverCallback?.(winner);
+    }
 
-                if (savedData.winner) this.#state.setWinner(savedData.winner);
-                if (savedData.multiJumpPiece) {
-                    this.#state.setMultiJumpPiece(savedData.multiJumpPiece.row, savedData.multiJumpPiece.col);
-                }
-            } catch (error) {
-                this.resetGame();
+    loadState(savedData) {
+        try {
+            this.#state.restore(savedData); 
+            
+            if (savedData.history) {
+                this.#history = savedData.history.map(h => {
+                    const state = new GameState();
+                    state.restore(h.state);
+
+                    return {
+                        state: state,
+                        timer: h.timer || this.#timer.exportState()
+                    };
+                });
             }
+            
+            if (savedData.moveLog) {
+                this.#moveLog = savedData.moveLog;
+            }
+
+            if (savedData.timer) {
+                this.#timer.loadState(savedData.timer);
+            }
+
+            if (savedData.winner) this.#state.setWinner(savedData.winner);
+            if (savedData.multiJumpPiece) {
+                this.#state.setMultiJumpPiece(savedData.multiJumpPiece.row, savedData.multiJumpPiece.col);
+            }
+        } catch (error) {
+            this.resetGame();
         }
+    }
+
+    exportState() {
+        return {
+            grid: this.#state.boardMatrix,
+            turn: this.#state.currentTurn,
+            history: this.#history.map(h => ({
+                state: h.state.toJSON(),
+                timer: h.timer
+            })),
+            winner: this.#state.winner,
+            multiJumpPiece: this.#state.multiJumpPiece,
+            moveLog: this.#moveLog,
+            timer: this.#timer.exportState()
+        };
     }
 
     get board() { return this.#state.boardMatrix; }
     get currentTurn() { return this.#state.currentTurn; }
     get multiJumpPiece() { return this.#state.multiJumpPiece; }
     get winner() { return this.#state.winner; }
-    
-    get selectedCell() { return this.#selectedCell; }
-    get validMoves() { return this.#validMoves; }
     get moveLog() { return this.#moveLog; }
-    get historyHighlight() { return this.#historyHighlight; }
+    get timerTimes() { return this.#timer.currentTimes; } 
+
+    bindTimerTick(callback) {
+        this.#timer.bindTick(callback);
+    }
+
+    bindGameOver(callback) {
+        this.#onGameOverCallback = callback;
+    }
+
+    startGame() {
+        if (!this.winner) {
+            this.#timer.start(this.currentTurn);
+        }
+    }
 
     undo() {
         if (this.#history.length === 0) return; 
         
-        this.#state = this.#history.pop();
-        this.#moveLog.pop(); 
+        const previous = this.#history.pop();
         
-        this.clearSelection(); 
-        this.clearHistoryHighlight();
-        this.#save();
-    }
+        this.#state = previous.state;
+        this.#timer.loadState(previous.timer); 
+        this.#moveLog.pop(); 
 
-    #save() {
-        StorageService.save({
-            grid: this.#state.boardMatrix,
-            turn: this.#state.currentTurn,
-            history: this.#history.map(state => state.toJSON()),
-            winner: this.#state.winner,
-            multiJumpPiece: this.#state.multiJumpPiece,
-            moveLog: this.#moveLog
-        });
+        if (!this.winner) {
+            this.#timer.switchTurn(this.currentTurn);
+        }
     }
 
     resetGame() {
         this.#state.reset();
         this.#history = []; 
         this.#moveLog = [];
-        this.clearSelection(); 
-        this.clearHistoryHighlight();
-        StorageService.clear();
+        this.#timer.reset();
     }
 
     getValidMoves(row, col) {
         return MoveValidator.getValidMoves(this.#state, row, col);
     }
 
-    selectSquare(row, col) {
-        if (this.#state.multiJumpPiece) return;
-
-        const piece = this.board[row][col];
-        
-        if (piece !== null && piece.player === this.currentTurn) {
-            this.#selectedCell = { row, col };
-            this.#validMoves = this.getValidMoves(row, col);
-        } else {
-            this.clearSelection();
-        }
-    }
-
-    clearSelection() {
-        this.#selectedCell = null;
-        this.#validMoves = [];
-    }
-
-    setHistoryHighlight(from, to) {
-        this.#historyHighlight = { from, to };
-        this.clearSelection(); 
-    }
-
-    clearHistoryHighlight() {
-        this.#historyHighlight = null;
-    }
-
-
     movePiece(fromRow, fromCol, toRow, toCol, moveInfo) {
         const isCapture = moveInfo.type === 'capture';
 
         if (!this.#state.multiJumpPiece) {
-            this.#history.push(this.#state.clone());
+            this.#history.push({
+                state: this.#state.clone(),
+                timer: this.#timer.exportState()
+            });
             
             const moveString = NotationHelper.formatMove(fromRow, fromCol, toRow, toCol, isCapture);
             
@@ -135,7 +138,6 @@ export class CheckersModel {
         } else {
             const lastMove = this.#moveLog[this.#moveLog.length - 1];
             const toNotation = NotationHelper.toNotation(toRow, toCol);
-            
             lastMove.notation += `x${toNotation}`;
             lastMove.to = {row: toRow, col: toCol};
         }
@@ -145,23 +147,21 @@ export class CheckersModel {
         if (isCapture && !result.becameKing) {
             if (MoveValidator.getCapturesForPiece(this.#state, toRow, toCol).length > 0) {
                 this.#state.setMultiJumpPiece(toRow, toCol); 
-                
-                this.#selectedCell = { row: toRow, col: toCol };
-                this.#validMoves = this.getValidMoves(toRow, toCol);
-                
-                this.#save();
                 return false; 
             }
         }
 
         this.#state.clearMultiJumpPiece();
         this.#state.switchTurn();
-        this.clearSelection(); 
 
         const winner = MoveValidator.calculateWinner(this.#state);
-        if (winner) this.#state.setWinner(winner);
         
-        this.#save();
+        if (winner) {
+            this.#notifyGameOver(winner);
+        } else {
+            this.#timer.switchTurn(this.currentTurn);
+        }
+        
         return true; 
     }
 }

@@ -39,3 +39,7 @@ export const GAME_SETTINGS = {
     INITIAL_TIME_SECONDS: 300,
 };
 
+export const GAME_RESULTS = {
+    TIMEOUT: 'TIMEOUT',
+};
+

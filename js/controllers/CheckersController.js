@@ -1,115 +1,66 @@
-import { GameTimer } from '../models/GameTimer.js';
+import { ControllerState } from './ControllerState.js';
+import { ViewUpdater } from './ViewUpdater.js';
+import { InteractionController } from './InteractionController.js';
+import { HistoryController } from './HistoryController.js';
+import { GameLifecycleController } from './GameLifecycleController.js';
+import { TimerController } from './TimerController.js';
 
 export class CheckersController {
-    #model; 
-    #view; 
-    #isAnimating;
-    #timer; 
+    #model;
+    #view;
+    #storage;
+    #state;
+    #viewUpdater;
+    #interactionController;
+    #historyController;
+    #gameLifecycleController;
+    #timerController;
 
-    constructor(model, view) {
+    constructor(model, view, storage) {
         this.#model = model;
         this.#view = view;
-        this.#isAnimating = false;
+        this.#storage = storage;
 
-        this.#timer = new GameTimer(
-            (times) => this.#view.timerView.render(times, this.#model.currentTurn),
-            (winner) => {
-                this.#view.showWinner(winner); 
-            }
+        const persistState = () => {
+            this.#storage.save(this.#model.exportState());
+        };
+
+        this.#state = new ControllerState();
+        this.#viewUpdater = new ViewUpdater(this.#model, this.#view, this.#state);
+
+        this.#timerController = new TimerController(this.#model, this.#view, persistState);
+
+        this.#interactionController = new InteractionController(
+            this.#model,
+            this.#view,
+            this.#state,
+            this.#viewUpdater,
+            persistState
         );
 
-        this.#view.bindSquareClick((row, col) => this.#handleInteraction(row, col));
-        this.#view.bindDrop((row, col) => this.#handleInteraction(row, col)); 
-        this.#view.bindDragStart((row, col) => this.#handleDragStart(row, col)); 
-        this.#view.bindRestartClick(() => this.#handleRestartGame());
-        this.#view.bindUndoClick(() => this.#handleUndo());
-        
-        this.#view.historyView.bindClick((from, to) => this.#handleHistoryClick(from, to));
-        
-        this.#updateView();
+        this.#historyController = new HistoryController(this.#state, this.#viewUpdater);
 
-        if (!this.#model.winner) {
-            this.#timer.start(this.#model.currentTurn);
-        }
-    }
-
-    #handleHistoryClick(from, to) {
-        if (this.#isAnimating) return;
-        this.#model.setHistoryHighlight(from, to);
-        this.#updateView();
-    }
-
-    #handleUndo() {
-        if(this.#isAnimating) return;
-        this.#model.undo();
-        this.#updateView();
-        
-        if (!this.#model.winner) {
-            this.#view.hideWinner();
-            this.#timer.start(this.#model.currentTurn);
-            this.#timer.switchTurn(this.#model.currentTurn);
-        }
-    }
-
-    #handleDragStart(row, col) {
-        if (this.#isAnimating || this.#model.winner) return;
-        
-        this.#model.clearHistoryHighlight(); 
-        this.#model.selectSquare(row, col);
-        this.#updateView();
-    }
-
-    #handleInteraction(row, col) {
-        if (this.#isAnimating || this.#model.winner) return;
-        
-        this.#model.clearHistoryHighlight(); 
-
-        const currentSelection = this.#model.selectedCell;
-        const moveTarget = this.#model.validMoves.find(m => m.row === row && m.col === col);
-        
-        if (moveTarget && currentSelection) {
-            this.#isAnimating = true;
-            this.#view.hideSelectionAndHighlights(); 
-
-            this.#view.animateMove(currentSelection.row, currentSelection.col, row, col, () => {
-                this.#model.movePiece(currentSelection.row, currentSelection.col, row, col, moveTarget);
-                
-                this.#updateView();
-                this.#isAnimating = false;
-                
-                if (this.#model.winner) {
-                    this.#view.showWinner(this.#model.winner);
-                    this.#timer.stop(); 
-                } else {
-                    this.#timer.switchTurn(this.#model.currentTurn);
-                }
-            });
-            return;
-        }
-
-        this.#model.selectSquare(row, col);
-        this.#updateView();
-    }
-
-    #updateView() {
-        this.#view.renderBoard(
-            this.#model.board, 
-            this.#model.selectedCell, 
-            this.#model.validMoves, 
-            this.#model.currentTurn,
-            this.#model.historyHighlight
+        this.#gameLifecycleController = new GameLifecycleController(
+            this.#model,
+            this.#view,
+            this.#storage,
+            this.#state,
+            this.#viewUpdater,
+            persistState,
+            this.#timerController
         );
-        
-        this.#view.historyView.render(this.#model.moveLog);
-    }
 
-    #handleRestartGame() {
-        if (this.#isAnimating) return;
-        this.#model.resetGame();
-        this.#view.hideWinner();
-        this.#updateView();
+        this.#view.bindSquareClick((row, col) => this.#interactionController.handleInteraction(row, col));
+        this.#view.bindDrop((row, col) => this.#interactionController.handleInteraction(row, col));
+        this.#view.bindDragStart((row, col) => this.#interactionController.handleDragStart(row, col));
+        this.#view.bindRestartClick(() => this.#gameLifecycleController.handleRestartGame());
+        this.#view.bindUndoClick(() => this.#gameLifecycleController.handleUndo());
 
-        this.#timer.reset();
-        this.#timer.start(this.#model.currentTurn);
+        this.#view.historyView.bindClick((from, to) => this.#historyController.handleHistoryClick(from, to));
+
+        this.#viewUpdater.render();
+
+        this.#timerController.renderInitial();
+        this.#timerController.startIfNeeded();
     }
 }

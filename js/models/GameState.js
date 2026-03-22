@@ -14,7 +14,7 @@ export class GameState {
 
     clone() {
         const clonedState = new GameState();
-        clonedState.restoreFromClone(
+        clonedState.#restoreFromClone(
             this.#board.clone(),
             this.#currentTurn,
             this.#multiJumpPiece,
@@ -23,7 +23,7 @@ export class GameState {
         return clonedState;
     }
 
-    restoreFromClone(clonedBoard, turn, multiJumpPiece, winner) {
+    #restoreFromClone(clonedBoard, turn, multiJumpPiece, winner) {
         this.#board = clonedBoard;
         this.#currentTurn = turn;
         this.#multiJumpPiece = multiJumpPiece ? { ...multiJumpPiece } : null;
@@ -73,13 +73,11 @@ export class GameState {
 
     executeMove(fromRow, fromCol, toRow, toCol, moveInfo) {
         const piece = this.#board.getPiece(fromRow, fromCol);
-        let wasCapture = false;
 
         this.#board.move(fromRow, fromCol, toRow, toCol);
 
         if (moveInfo.type === 'capture') {
             this.#board.remove(moveInfo.capturedRow, moveInfo.capturedCol);
-            wasCapture = true;
         }
 
         let becameKing = false;
@@ -94,6 +92,6 @@ export class GameState {
             }
         }
 
-        return { wasCapture: wasCapture, becameKing: becameKing };
+        return { becameKing: becameKing };
     }
 }

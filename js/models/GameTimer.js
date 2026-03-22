@@ -4,21 +4,43 @@ export class GameTimer {
     #timeLight;
     #timeDark;
     #intervalId = null;
-    #onTick;
-    #onTimeOut;
     #activePlayer;
+    
+    #onTick = () => {};
+    #onTimeOut = () => {};
 
-    constructor(onTick, onTimeOut) {
-        this.#onTick = onTick;
-        this.#onTimeOut = onTimeOut;
-        
+    constructor() {
+        this.#timeLight = GAME_SETTINGS.INITIAL_TIME_SECONDS;
+        this.#timeDark = GAME_SETTINGS.INITIAL_TIME_SECONDS;
+    }
 
-        if (!this.#loadState()) {
-            this.#timeLight = GAME_SETTINGS.INITIAL_TIME_SECONDS;
-            this.#timeDark = GAME_SETTINGS.INITIAL_TIME_SECONDS;
+    bindTick(callback) {
+        this.#onTick = callback;
+    }
+
+    bindTimeOut(callback) {
+        this.#onTimeOut = callback;
+    }
+
+    get currentTimes() {
+        return {
+            [PLAYERS.LIGHT]: this.#formatTime(this.#timeLight),
+            [PLAYERS.DARK]: this.#formatTime(this.#timeDark)
+        };
+    }
+
+    loadState(timerData) {
+        if (timerData && typeof timerData.light === 'number') {
+            this.#timeLight = timerData.light;
+            this.#timeDark = timerData.dark;
         }
-        
-        this.#update(); 
+    }
+
+    exportState() {
+        return {
+            light: this.#timeLight,
+            dark: this.#timeDark
+        };
     }
 
     reset() {
@@ -26,7 +48,6 @@ export class GameTimer {
         this.#timeLight = GAME_SETTINGS.INITIAL_TIME_SECONDS;
         this.#timeDark = GAME_SETTINGS.INITIAL_TIME_SECONDS;
         this.#activePlayer = PLAYERS.LIGHT;
-        this.#saveState(); 
         this.#update();
     }
 
@@ -45,19 +66,17 @@ export class GameTimer {
 
     switchTurn(newPlayer) {
         this.#activePlayer = newPlayer;
-        this.#saveState(); 
     }
 
     #tick() {
         if (this.#activePlayer === PLAYERS.LIGHT) {
             this.#timeLight--;
-            if (this.#timeLight <= 0) this.#triggerTimeOut(PLAYERS.DARK);
+            if (this.#timeLight <= 0) this.#triggerTimeOut(PLAYERS.DARK); 
         } else {
             this.#timeDark--;
             if (this.#timeDark <= 0) this.#triggerTimeOut(PLAYERS.LIGHT);
         }
         
-        this.#saveState(); 
         this.#update();
     }
 
@@ -67,41 +86,12 @@ export class GameTimer {
     }
 
     #update() {
-        this.#onTick({
-            [PLAYERS.LIGHT]: this.formatTime(this.#timeLight),
-            [PLAYERS.DARK]: this.formatTime(this.#timeDark)
-        });
+        this.#onTick(this.currentTimes);
     }
 
-    formatTime(seconds) {
+    #formatTime(seconds) {
         const m = Math.floor(seconds / 60).toString().padStart(2, '0');
         const s = (seconds % 60).toString().padStart(2, '0');
         return `${m}:${s}`;
-    }
-
-    #saveState() {
-        try {
-            localStorage.setItem('checkers_timer', JSON.stringify({
-                light: this.#timeLight,
-                dark: this.#timeDark
-            }));
-        } catch (e) {
-            
-        }
-    }
-
-    #loadState() {
-        try {
-            const saved = localStorage.getItem('checkers_timer');
-            if (saved) {
-                const data = JSON.parse(saved);
-                this.#timeLight = data.light;
-                this.#timeDark = data.dark;
-                return true;
-            }
-        } catch (e) {
-           
-        }
-        return false;
     }
 }

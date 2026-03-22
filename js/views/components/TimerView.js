@@ -1,4 +1,4 @@
-import { PLAYERS } from '../constants.js';
+import { PLAYERS } from '../../constants.js';
 
 export class TimerView {
     #container;
