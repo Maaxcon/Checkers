@@ -23,7 +23,7 @@ export class MoveValidator {
                 if (this.isCurrentPlayerPiece(gameState, piece)) {
                     const moves = MoveEngine.getMovesForPiece(gameState.board, row, col);
                     
-                    if (moves.some(m => m.type === 'capture')) {
+                    if (moves.some(move => move.type === 'capture')) {
                         return { hasCaptures: true, hasMoves: true };
                     }
 

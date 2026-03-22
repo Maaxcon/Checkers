@@ -31,13 +31,13 @@ export class CheckersModel {
             this.#state.restore(savedData); 
             
             if (savedData.history) {
-                this.#history = savedData.history.map(h => {
+                this.#history = savedData.history.map(historyEntry => {
                     const state = new GameState();
-                    state.restore(h.state);
+                    state.restore(historyEntry.state);
 
                     return {
                         state: state,
-                        timer: h.timer || this.#timer.exportState()
+                        timer: historyEntry.timer || this.#timer.exportState()
                     };
                 });
             }
@@ -63,9 +63,9 @@ export class CheckersModel {
         return {
             grid: this.#state.boardMatrix,
             turn: this.#state.currentTurn,
-            history: this.#history.map(h => ({
-                state: h.state.toJSON(),
-                timer: h.timer
+            history: this.#history.map(historyEntry => ({
+                state: historyEntry.state.toJSON(),
+                timer: historyEntry.timer
             })),
             winner: this.#state.winner,
             multiJumpPiece: this.#state.multiJumpPiece,

@@ -19,11 +19,11 @@ export class MoveEngine {
         const directionsY = piece.moveDirections;
         const directionsX = [-1, 1];
 
-        for (let i = 0; i < directionsY.length; i++) {
-            const directionY = directionsY[i];
+        for (let dirIndex = 0; dirIndex < directionsY.length; dirIndex++) {
+            const directionY = directionsY[dirIndex];
             
-            for (let j = 0; j < directionsX.length; j++) {
-                const directionX = directionsX[j];
+            for (let offsetIndex = 0; offsetIndex < directionsX.length; offsetIndex++) {
+                const directionX = directionsX[offsetIndex];
                 const newRow = row + directionY;
                 const newCol = col + directionX;
                 
@@ -43,8 +43,8 @@ export class MoveEngine {
             {rowOffset: 1, colOffset: 1}
         ];
         
-        for (let i = 0; i < captureDirections.length; i++) {
-            const direction = captureDirections[i];
+        for (let dirIndex = 0; dirIndex < captureDirections.length; dirIndex++) {
+            const direction = captureDirections[dirIndex];
             
             const jumpRow = row + (direction.rowOffset * GAME_SETTINGS.JUMP_DISTANCE);
             const jumpCol = col + (direction.colOffset * GAME_SETTINGS.JUMP_DISTANCE);
@@ -81,8 +81,8 @@ export class MoveEngine {
             {rowOffset: 1, colOffset: 1}
         ]; 
 
-        for (let i = 0; i < directions.length; i++) {
-            const direction = directions[i];
+        for (let dirIndex = 0; dirIndex < directions.length; dirIndex++) {
+            const direction = directions[dirIndex];
             let currentRow = row + direction.rowOffset;
             let currentCol = col + direction.colOffset;
             let foundEnemy = null; 

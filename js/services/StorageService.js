@@ -10,7 +10,7 @@ export class StorageService {
         if (!json) return null;
         try {
             return JSON.parse(json);
-        } catch (e) {
+        } catch (error) {
             this.clear();
             return null;
         }

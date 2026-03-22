@@ -106,38 +106,38 @@ export class BoardView {
             }
         }
 
-        this.#boardElement.onclick = (e) => {
-            const cell = e.target.closest(`.${CSS.CELL}`);
+        this.#boardElement.onclick = (event) => {
+            const cell = event.target.closest(`.${CSS.CELL}`);
             if (cell) this.#onSquareClick?.(parseInt(cell.dataset.row), parseInt(cell.dataset.col));
         };
     }
 
     #initDragAndDrop() {
-        this.#boardElement.addEventListener('dragstart', (e) => {
-            const checker = e.target.closest(`.${CSS.CHECKER}`);
-            if (!checker) { e.preventDefault(); return; }
+        this.#boardElement.addEventListener('dragstart', (event) => {
+            const checker = event.target.closest(`.${CSS.CHECKER}`);
+            if (!checker) { event.preventDefault(); return; }
 
             const cell = checker.closest(`.${CSS.CELL}`);
             const row = parseInt(cell.dataset.row);
             const col = parseInt(cell.dataset.col);
 
-            e.dataTransfer.setData('application/json', JSON.stringify({ row, col }));
-            e.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('application/json', JSON.stringify({ row, col }));
+            event.dataTransfer.effectAllowed = 'move';
 
             this.#onDragStart?.(row, col);
         });
 
-        this.#boardElement.addEventListener('dragover', (e) => {
-            const cell = e.target.closest(`.${CSS.CELL}`);
+        this.#boardElement.addEventListener('dragover', (event) => {
+            const cell = event.target.closest(`.${CSS.CELL}`);
             if (cell && cell.classList.contains(CSS.HIGHLIGHT)) {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = 'move';
+                event.preventDefault();
+                event.dataTransfer.dropEffect = 'move';
             }
         });
 
-        this.#boardElement.addEventListener('drop', (e) => {
-            e.preventDefault();
-            const cell = e.target.closest(`.${CSS.CELL}`);
+        this.#boardElement.addEventListener('drop', (event) => {
+            event.preventDefault();
+            const cell = event.target.closest(`.${CSS.CELL}`);
             if (!cell || !cell.classList.contains(CSS.HIGHLIGHT)) return;
 
             const targetRow = parseInt(cell.dataset.row);

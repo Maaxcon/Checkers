@@ -9,7 +9,7 @@ export class ControllerState {
     get historyHighlight() { return this.#historyHighlight; }
     get isAnimating() { return this.#isAnimating; }
     findMoveTarget(row, col) {
-        return this.#validMoves.find(m => m.row === row && m.col === col);
+        return this.#validMoves.find(move => move.row === row && move.col === col);
     }
 
     setAnimating(value) {

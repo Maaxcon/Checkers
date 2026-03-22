@@ -98,23 +98,23 @@ export class InteractionController {
     }
 
     #initKeyboard() {
-        this.#keyboardHandler = (e) => this.#handleKeyDown(e);
+        this.#keyboardHandler = (event) => this.#handleKeyDown(event);
         document.addEventListener('keydown', this.#keyboardHandler);
     }
 
-    #handleKeyDown(e) {
+    #handleKeyDown(event) {
         const keys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', ' '];
-        if (!keys.includes(e.key)) return;
-        e.preventDefault();
+        if (!keys.includes(event.key)) return;
+        event.preventDefault();
 
         if (!this.#keyboardCursor) {
             this.#keyboardCursor = { row: 3, col: 3 };
         } else {
-            if (e.key === 'ArrowUp') this.#keyboardCursor.row = Math.max(0, this.#keyboardCursor.row - 1);
-            if (e.key === 'ArrowDown') this.#keyboardCursor.row = Math.min(BOARD.ROWS - 1, this.#keyboardCursor.row + 1);
-            if (e.key === 'ArrowLeft') this.#keyboardCursor.col = Math.max(0, this.#keyboardCursor.col - 1);
-            if (e.key === 'ArrowRight') this.#keyboardCursor.col = Math.min(BOARD.COLS - 1, this.#keyboardCursor.col + 1);
-            if (e.key === 'Enter' || e.key === ' ') {
+            if (event.key === 'ArrowUp') this.#keyboardCursor.row = Math.max(0, this.#keyboardCursor.row - 1);
+            if (event.key === 'ArrowDown') this.#keyboardCursor.row = Math.min(BOARD.ROWS - 1, this.#keyboardCursor.row + 1);
+            if (event.key === 'ArrowLeft') this.#keyboardCursor.col = Math.max(0, this.#keyboardCursor.col - 1);
+            if (event.key === 'ArrowRight') this.#keyboardCursor.col = Math.min(BOARD.COLS - 1, this.#keyboardCursor.col + 1);
+            if (event.key === 'Enter' || event.key === ' ') {
                 this.handleInteraction(this.#keyboardCursor.row, this.#keyboardCursor.col);
                 return;
             }
