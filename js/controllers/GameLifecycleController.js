@@ -16,9 +16,9 @@ export class GameLifecycleController {
         this.#persistState = persistState;
         this.#timerController = timerController;
 
-        this.#model.bindGameOver((winner) => {
+        this.#model.bindGameOver((winner, reason) => {
             this.#persistState();
-            this.#view.showWinner(winner);
+            this.#view.showWinner(winner, reason);
         });
     }
 

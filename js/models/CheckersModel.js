@@ -2,6 +2,7 @@ import { GameState } from './GameState.js';
 import { MoveValidator } from './MoveValidator.js';
 import { NotationHelper } from '../utils/NotationHelper.js'; 
 import { GameTimer } from './GameTimer.js'; 
+import { GAME_RESULTS } from '../constants.js';
 
 export class CheckersModel {
     #state;
@@ -15,14 +16,14 @@ export class CheckersModel {
         this.#timer = new GameTimer();
         
         this.#timer.bindTimeOut((winner) => {
-            this.#notifyGameOver(winner);
+            this.#notifyGameOver(winner, GAME_RESULTS.TIMEOUT);
         });
     }
 
-    #notifyGameOver(winner) {
+    #notifyGameOver(winner, reason = null) {
         this.#state.setWinner(winner);
         this.#timer.stop();
-        this.#onGameOverCallback?.(winner);
+        this.#onGameOverCallback?.(winner, reason);
     }
 
     loadState(savedData) {
@@ -115,8 +116,12 @@ export class CheckersModel {
         this.#timer.reset();
     }
 
-    getValidMoves(row, col) {
-        return MoveValidator.getValidMoves(this.#state, row, col);
+    getValidMoves(row, col, hasGlobalCaptures = null) {
+        return MoveValidator.getValidMoves(this.#state, row, col, hasGlobalCaptures);
+    }
+
+    getPlayerMoveStatus() {
+        return MoveValidator.getPlayerMoveStatus(this.#state);
     }
 
     movePiece(fromRow, fromCol, toRow, toCol, moveInfo) {

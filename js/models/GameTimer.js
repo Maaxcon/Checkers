@@ -34,12 +34,16 @@ export class GameTimer {
             this.#timeLight = timerData.light;
             this.#timeDark = timerData.dark;
         }
+        if (timerData && typeof timerData.activePlayer === 'number') {
+            this.#activePlayer = timerData.activePlayer;
+        }
     }
 
     exportState() {
         return {
             light: this.#timeLight,
-            dark: this.#timeDark
+            dark: this.#timeDark,
+            activePlayer: this.#activePlayer
         };
     }
 

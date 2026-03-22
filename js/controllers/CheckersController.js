@@ -38,7 +38,11 @@ export class CheckersController {
             persistState
         );
 
-        this.#historyController = new HistoryController(this.#state, this.#viewUpdater);
+        this.#historyController = new HistoryController(
+            this.#state,
+            this.#viewUpdater,
+            () => this.#interactionController.resetKeyboardCursor()
+        );
 
         this.#gameLifecycleController = new GameLifecycleController(
             this.#model,
@@ -62,5 +66,9 @@ export class CheckersController {
 
         this.#timerController.renderInitial();
         this.#timerController.startIfNeeded();
+    }
+
+    destroy() {
+        this.#interactionController.destroy();
     }
 }

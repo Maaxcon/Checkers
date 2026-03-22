@@ -7,6 +7,7 @@ export class InteractionController {
     #viewUpdater;
     #persistState;
     #keyboardCursor = null;
+    #keyboardHandler = null;
 
     constructor(model, view, state, viewUpdater, persistState) {
         this.#model = model;
@@ -20,6 +21,7 @@ export class InteractionController {
     handleDragStart(row, col) {
         if (this.#state.isAnimating || this.#model.winner) return;
 
+        this.resetKeyboardCursor();
         this.#state.setHistoryHighlight(null);
 
         if (this.#model.multiJumpPiece) {
@@ -29,7 +31,8 @@ export class InteractionController {
 
         const piece = this.#model.board[row][col];
         if (piece && piece.player === this.#model.currentTurn) {
-            this.#state.selectCell(row, col, this.#model.getValidMoves(row, col));
+            const hasGlobalCaptures = this.#model.getPlayerMoveStatus().hasCaptures;
+            this.#state.selectCell(row, col, this.#model.getValidMoves(row, col, hasGlobalCaptures));
             this.#viewUpdater.render();
         }
     }
@@ -37,9 +40,7 @@ export class InteractionController {
     handleInteraction(row, col) {
         if (this.#state.isAnimating || this.#model.winner) return;
 
-        this.#keyboardCursor = null;
-        this.#view.updateKeyboardCursor(null);
-
+        this.resetKeyboardCursor();
         this.#state.setHistoryHighlight(null);
 
         const moveTarget = this.#state.findMoveTarget(row, col);
@@ -56,7 +57,8 @@ export class InteractionController {
                 this.#persistState();
 
                 if (!turnEnded) {
-                    this.#state.selectCell(row, col, this.#model.getValidMoves(row, col));
+                    const hasGlobalCaptures = this.#model.getPlayerMoveStatus().hasCaptures;
+                    this.#state.selectCell(row, col, this.#model.getValidMoves(row, col, hasGlobalCaptures));
                 } else {
                     this.#state.clearSelection();
                 }
@@ -74,7 +76,8 @@ export class InteractionController {
 
         const piece = this.#model.board[row][col];
         if (piece && piece.player === this.#model.currentTurn) {
-            this.#state.selectCell(row, col, this.#model.getValidMoves(row, col));
+            const hasGlobalCaptures = this.#model.getPlayerMoveStatus().hasCaptures;
+            this.#state.selectCell(row, col, this.#model.getValidMoves(row, col, hasGlobalCaptures));
         } else {
             this.#state.clearSelection();
         }
@@ -82,25 +85,40 @@ export class InteractionController {
         this.#viewUpdater.render();
     }
 
-    #initKeyboard() {
-        document.addEventListener('keydown', (e) => {
-            const keys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', ' '];
-            if (!keys.includes(e.key)) return;
-            e.preventDefault();
+    resetKeyboardCursor() {
+        this.#keyboardCursor = null;
+        this.#view.updateKeyboardCursor(null);
+    }
 
-            if (!this.#keyboardCursor) {
-                this.#keyboardCursor = { row: 3, col: 3 };
-            } else {
-                if (e.key === 'ArrowUp') this.#keyboardCursor.row = Math.max(0, this.#keyboardCursor.row - 1);
-                if (e.key === 'ArrowDown') this.#keyboardCursor.row = Math.min(BOARD.ROWS - 1, this.#keyboardCursor.row + 1);
-                if (e.key === 'ArrowLeft') this.#keyboardCursor.col = Math.max(0, this.#keyboardCursor.col - 1);
-                if (e.key === 'ArrowRight') this.#keyboardCursor.col = Math.min(BOARD.COLS - 1, this.#keyboardCursor.col + 1);
-                if (e.key === 'Enter' || e.key === ' ') {
-                    this.handleInteraction(this.#keyboardCursor.row, this.#keyboardCursor.col);
-                    return;
-                }
+    destroy() {
+        if (this.#keyboardHandler) {
+            document.removeEventListener('keydown', this.#keyboardHandler);
+            this.#keyboardHandler = null;
+        }
+    }
+
+    #initKeyboard() {
+        this.#keyboardHandler = (e) => this.#handleKeyDown(e);
+        document.addEventListener('keydown', this.#keyboardHandler);
+    }
+
+    #handleKeyDown(e) {
+        const keys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', ' '];
+        if (!keys.includes(e.key)) return;
+        e.preventDefault();
+
+        if (!this.#keyboardCursor) {
+            this.#keyboardCursor = { row: 3, col: 3 };
+        } else {
+            if (e.key === 'ArrowUp') this.#keyboardCursor.row = Math.max(0, this.#keyboardCursor.row - 1);
+            if (e.key === 'ArrowDown') this.#keyboardCursor.row = Math.min(BOARD.ROWS - 1, this.#keyboardCursor.row + 1);
+            if (e.key === 'ArrowLeft') this.#keyboardCursor.col = Math.max(0, this.#keyboardCursor.col - 1);
+            if (e.key === 'ArrowRight') this.#keyboardCursor.col = Math.min(BOARD.COLS - 1, this.#keyboardCursor.col + 1);
+            if (e.key === 'Enter' || e.key === ' ') {
+                this.handleInteraction(this.#keyboardCursor.row, this.#keyboardCursor.col);
+                return;
             }
-            this.#view.updateKeyboardCursor(this.#keyboardCursor);
-        });
+        }
+        this.#view.updateKeyboardCursor(this.#keyboardCursor);
     }
 }

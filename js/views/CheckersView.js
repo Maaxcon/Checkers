@@ -93,8 +93,9 @@ export class CheckersView {
         this.#boardView.hideSelectionAndHighlights();
     }
 
-    showWinner(id) {
-        this.#winText.textContent = id === GAME_RESULTS.TIMEOUT ? "Time's up!" : `${id === PLAYERS.LIGHT ? "White" : "Black"} Wins!`;
+    showWinner(id, reason = null) {
+        const isTimeout = reason === GAME_RESULTS.TIMEOUT;
+        this.#winText.textContent = isTimeout ? "Time's up!" : `${id === PLAYERS.LIGHT ? "White" : "Black"} Wins!`;
         this.#winMessage.style.display = "flex";
         this.#boardView.setInteractive(false);
     }
